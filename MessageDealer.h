@@ -7,6 +7,7 @@
 #include "define.h"
 #include <winsock2.h>
 #include <string>
+#include <cstring>
 #include <iostream>
 class MessageDealer {
     public:
@@ -15,6 +16,10 @@ class MessageDealer {
         static std::string getHostName(char* buff);
         static void printHeaderAll(DNS_HEADER* header);
         static void printQueryAll(DNS_QUERY* query);
+        static char* ipv4ToChar(const std::string& str);
+        static char* ipv6ToChar(const std::string& str);
+        static std::string charToIpv4(char* str);
+        static std::string charToIpv6(char* str);
 
 };
 

@@ -9,6 +9,10 @@
 #include "define.h"
 #include "DNSStore.h"
 int main(){
+    char* str="24098c006c21103d000000ffb00239ab";
+   std::cout<<MessageDealer::charToIpv6(str)<<std::endl;
+
+    exit(1);
     //WSA init
     WORD sockVersion = MAKEWORD(2, 2);
     WSADATA wsaData;
@@ -40,6 +44,8 @@ int main(){
         exit(-1);
     }else
         printf("bind socket success for test\n");
+
+
 
     char rece_buff[MAX_BUFFER_SIZE];
     while(true){
