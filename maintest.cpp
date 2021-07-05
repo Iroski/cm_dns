@@ -27,7 +27,7 @@ int main(){
     int unBlock=-1;
     ioctlsocket(serveSoc,FIONBIO,(u_long FAR*)&unBlock);
     ioctlsocket(localSoc,FIONBIO,(u_long FAR*)&unBlock);
-    struct sockaddr_in serve_in, local_in,reveice_in;
+    struct sockaddr_in serve_in, local_in,receive_in;
     serve_in.sin_family = AF_INET;
     serve_in.sin_port = htons(PORT);
     serve_in.sin_addr.s_addr = inet_addr(SERVE_DNS_ADDR);
@@ -39,25 +39,42 @@ int main(){
         printf("bind error !");
         exit(-1);
     }else
-        printf("bind socket success\n");
+        printf("bind socket success for test\n");
 
     char rece_buff[MAX_BUFFER_SIZE];
-    while(1){
-        int len_rece = sizeof(reveice_in);
+    while(true){
+        int len_rece = sizeof(receive_in);
         memset(rece_buff, 0, MAX_BUFFER_SIZE); //将接收缓存先置为全0
 
         int rec_len;
-        rec_len= recvfrom(localSoc, rece_buff, sizeof(rece_buff), 0, (struct sockaddr *)&reveice_in, &len_rece);
+        rec_len= recvfrom(localSoc, rece_buff, sizeof(rece_buff), 0, (struct sockaddr *)&receive_in, &len_rece);
 
         if(rec_len != -1 && rec_len != 0){
-            char* tmp_ptr=rece_buff;
-            DNS_HEADER* header=MessageDealer::getDNSHeader(tmp_ptr);
-            DNS_QUERY * query=MessageDealer::getDNSQuery(tmp_ptr);
-            if(query->type!=1&&query->type!=28){// type not A & AAAA
-
-            }else{
-
+            unsigned short iSend;
+            iSend = sendto(serveSoc, rece_buff, rec_len, 0, (SOCKADDR*)&serve_in, sizeof(serve_in));
+            clock_t start, stop; //定时
+            double duration = 0;
+            start = clock();
+            rec_len = recvfrom(serveSoc, rece_buff, sizeof(rece_buff), 0, (SOCKADDR*)&receive_in, &len_rece);
+            while ((rec_len == 0) || (rec_len == SOCKET_ERROR))
+            {
+                rec_len = recvfrom(serveSoc, rece_buff, sizeof(rece_buff), 0, (SOCKADDR*)&receive_in, &len_rece);
+                stop = clock();
+                duration = (double)(stop - start) / CLK_TCK;
+                if (duration > 5)
+                {
+                    printf("Long Time No Response From Server.\n");
+                    break;
+                }
             }
+            if(rec_len != -1 && rec_len != 0){
+                char* tmp_ptr=rece_buff;
+                DNS_HEADER* header=MessageDealer::getDNSHeader(tmp_ptr);
+                DNS_QUERY * query=MessageDealer::getDNSQuery(tmp_ptr);
+                MessageDealer::printQueryAll(query);
+                MessageDealer::printHeaderAll(header);
+            }
+
         }
 
 
