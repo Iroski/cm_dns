@@ -92,4 +92,6 @@ void forwardQuery(char *recvBuf, sockaddr_in reveice_in){
     recv_ID = (unsigned short*)malloc(sizeof(unsigned short*));
     memcpy(recv_ID, recvBuf, sizeof(unsigned short));    // 收到报文的ID（前2字节）
     send_ID = htons(MessageDealer::getNewID(ntohs(*recv_ID), reveice_in, FALSE));
+    //PrintInfo(ntohs(send_ID), not_find);
+    iSend = sendto(servSock, recvBuf, iRecv, 0, (SOCKADDR*)&serverName, sizeof(serverName));
 }

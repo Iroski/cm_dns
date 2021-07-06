@@ -131,6 +131,6 @@ std::string MessageDealer::charToIpv4(char *str) {
     return std::__cxx11::string();
 }
 
-unsigned short *MessageDealer::getNewID(unsigned short *recv_ID, sockaddr_in reveice_in, WINBOOL) {
-    return nullptr;
+unsigned short MessageDealer::getNewID(unsigned short recv_ID, sockaddr_in reveice_in, WINBOOL) {
+    return 0;
 }
