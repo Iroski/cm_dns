@@ -8,6 +8,7 @@
 #define MAX_BUFFER_SIZE 1024
 #define LOCAL_DNS_ADDR "127.0.0.1"
 #define SERVE_DNS_ADDR "10.3.9.45"
+#define URL_LENGTH 64
 #include <winsock2.h>
 #include <bits/stdc++.h>
 //DNS域名解析表结构
