@@ -119,16 +119,31 @@ std::string MessageDealer::charToIpv6(char *str) {
         strncpy(tmp,str,4);
         char* endptr;
         sprintf(result_char+result_len,"%x", strtol(tmp,&endptr,16));
-        sprintf(result_char+result_len+1,"%s", ":");
+        result_len= strlen(result_char);
+        sprintf(result_char+result_len,"%s", ":");
         result_len= strlen(result_char);
         str+=4;
     }
     std::string result=result_char;
-    return result;
+    return result.erase(result.find_last_not_of(":") + 1);
 }
 
 std::string MessageDealer::charToIpv4(char *str) {
-    return std::__cxx11::string();
+    char* result_char=new char[40];
+    int len= strlen(str);
+    int result_len=0;
+    for(int i=0;i<len;i=i+4){
+        char* tmp=new char[4];
+        strncpy(tmp,str,4);
+        char* endptr;
+        sprintf(result_char+result_len,"%d", strtol(tmp,&endptr,16));
+        result_len= strlen(result_char);
+        sprintf(result_char+result_len,"%s", ".");
+        result_len= strlen(result_char);
+        str+=4;
+    }
+    std::string result=result_char;
+    return result.erase(result.find_last_not_of(".") + 1);
 }
 
 unsigned short *MessageDealer::getNewID(unsigned short *recv_ID, sockaddr_in reveice_in, WINBOOL) {
