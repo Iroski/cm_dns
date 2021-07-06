@@ -4,11 +4,12 @@
 
 #ifndef CM_DNS_CPP_MESSAGEDEALER_H
 #define CM_DNS_CPP_MESSAGEDEALER_H
-#include "define.h"
 #include <winsock2.h>
+#include <windows.h>
 #include <string>
 #include <cstring>
 #include <iostream>
+#include "define.h"
 class MessageDealer {
     public:
         static DNS_HEADER* getDNSHeader(char* buff);

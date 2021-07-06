@@ -10,7 +10,7 @@
 #include "MessageDealer.h"
 #include "define.h"
 #include "DNSStore.h"
-
+std::string URL;  //域名
 int main() {
 //    char* str="24098c006c21103d000000ffb00239ab";
 //   std::cout<<MessageDealer::charToIpv6(str)<<std::endl;

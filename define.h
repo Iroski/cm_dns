@@ -14,6 +14,7 @@
 #define PATH "dnsrelay.txt"
 
 #include <winsock2.h>
+#include <windows.h>
 #include <bits/stdc++.h>
 #include <unordered_map>
 //DNS域名解析表结构
