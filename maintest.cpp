@@ -13,7 +13,9 @@
 #include "DNSStore.h"
 #include "DetailedLogDealer.h"
 int getState(char *state);
-
+std::string URL;  //域名
+int ID_COUNT;
+IDTransform IDTransTable[ID_AMOUNT];
 int main(int argc, char **argv) {
 
     char *mode = "-dd";

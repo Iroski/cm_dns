@@ -12,7 +12,7 @@
 class DetailedLogDealer {
 public:
      static void receiveLocalInit();
-
+    static void externalInit();
      static void readLocalAddr(int len, struct sockaddr_in receive_in);
 };
 

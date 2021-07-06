@@ -15,3 +15,7 @@ void DetailedLogDealer::readLocalAddr(int len, struct sockaddr_in receive_in) {
     std::cout<<"Received from local : "<<MessageDealer::charToIpv4(s)<<":"<<receive_in.sin_port<<" ("<<len<<" bytes)"<<std::endl;
 }
 
+void DetailedLogDealer::externalInit() {
+    std::cout << "----------EXTERN RESPONSE---------" << std::endl;
+}
+
