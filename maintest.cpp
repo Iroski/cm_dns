@@ -54,7 +54,7 @@ int main() {
         printf("bind socket success for test\n");
     }
 
-    char rece_buff[1024];
+    char rece_buff[MAX_BUFFER_SIZE];
     while (true) {
         int len_rece = sizeof(receive_in);
         memset(rece_buff, 0, MAX_BUFFER_SIZE); //将接收缓存先置为全0
@@ -82,6 +82,7 @@ int main() {
             memset(rece_buff, 0, MAX_BUFFER_SIZE);
             header = MessageDealer::getDNSHeader(tmp_ptr);
             query = MessageDealer::getDNSQuery(tmp_ptr);
+            //todo: sendto reciver
             while ((rec_len == 0) || (rec_len == SOCKET_ERROR)) {
                 rec_len = recvfrom(externSoc, rece_buff, sizeof(rece_buff), 0, (SOCKADDR *) &receive_in, &len_rece);
                 stop = clock();

@@ -44,7 +44,7 @@ void DNSStore::initLocalTable(const std::string Path) {
         std::stringstream input(Temp[j]);
         while (input >> result)
             res.push_back(result);
-        store_map[res[0]] = res[1];
+        store_map[res[1]] = res[0];
     }
     printf("here!");
     for (auto &iter : store_map) {
