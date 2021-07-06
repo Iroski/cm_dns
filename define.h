@@ -10,6 +10,7 @@
 #define TABLE_SIZE 200
 #define NOT_FOUND 32767
 #define PATH "dnsrelay.txt"
+
 #include <winsock2.h>
 #include <bits/stdc++.h>
 #include <unordered_map>
