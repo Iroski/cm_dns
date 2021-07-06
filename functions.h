@@ -6,9 +6,11 @@
 #define CM_DNS_CPP_FUNCTIONS_H
 
 
+#include <string>
+
 class functions {
     public:
-        static void printDNSInformation(unsigned short ID, int find);
+        static void printDNSInformation(unsigned short ID, int find, std::string ip);
 };
 
 

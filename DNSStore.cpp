@@ -52,7 +52,3 @@ void DNSStore::initLocalTable(const std::string Path) {
     printf("Load records success.\n");
 }
 
-//int DNSStore::checkDomainExist(char *domain) {
-//    std::string domain_str = std::string(domain);
-//    return 0;
-//}

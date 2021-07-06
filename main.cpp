@@ -69,13 +69,20 @@ int main(){
                 URL = MessageDealer::getHostName(tmp_ptr); // 读取域名
                 std::string ip = (new DNSStore)->getStoredIpByDomain(URL);   //查看是否在本地表中
                 if(ip == ""){
-                    forwardQuery(tmp_ptr, reveice_in);
+                    forwardQuery(tmp_ptr, reveice_in);git
                 }
                 else if (ip=="nigeiwoligiaogiao") {
                     break; // ********************************
                 }
+                unsigned short AFlag=htons(0x8180);
+                memccpy(s)
                 else{
+                    if (ip=="0.0.0.0") {
+                        printf("**********No such name!**********");
+                    }
+                    else {
 
+                    }
                 }
             }
         }
@@ -91,5 +98,5 @@ void forwardQuery(char *recvBuf, sockaddr_in reveice_in){
     unsigned short send_ID;
     recv_ID = (unsigned short*)malloc(sizeof(unsigned short*));
     memcpy(recv_ID, recvBuf, sizeof(unsigned short));    // 收到报文的ID（前2字节）
-    send_ID = htons(MessageDealer::getNewID(ntohs(*recv_ID), reveice_in, FALSE));
+    //send_ID = htons(MessageDealer::getNewID(ntohs(*recv_ID), reveice_in, FALSE));
 }
