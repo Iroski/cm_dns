@@ -11,7 +11,8 @@
 #include "functions.h"
 
 std::string URL;  //域名
-void forwardQuery(char *recvBuf, sockaddr_in receive_in);   //将查询转发到本地DNS服务器
+int ID_COUNT;
+IDTransform IDTransTable[ID_AMOUNT];	//ID转换表
 
 int main(){
     //WSA init
@@ -22,6 +23,7 @@ int main(){
     }
     DNSStore store;
     store.initLocalTable(PATH);
+
     //创建套接字
     SOCKET externSoc = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     SOCKET localSoc = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -72,75 +74,18 @@ int main(){
                 URL = MessageDealer::getHostName(tmp_ptr); // 读取域名
                 std::string ip = store.getStoredIpByDomain(URL);   //查看是否在本地表中
                 if(ip == ""){
-                    forwardQuery(tmp_ptr, receive_in);
+                    functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len);
                 }
                 else if (ip=="nigeiwoligiaogiao") {
                     break; // ********************************
                 }
 
                 else{
-                    char send_buf[MAX_BUFFER_SIZE];
-                    unsigned short *pID=(unsigned short*)malloc(sizeof(unsigned short*));
-                    memcpy(pID, rece_buff, sizeof(unsigned short));
-                    memcpy(send_buf,rece_buff,rec_len);
-                    unsigned short nID=11;//***********************
-                    unsigned short AFlag=htons(0x8180);
-                    memcpy(&send_buf[2], &AFlag, sizeof(unsigned short));
-                    functions::printDNSInformation(nID,1,ip);
-                    if (ip=="0.0.0.0") {
-                        AFlag=htons(0x0000);
-                        printf("**********  No such name!  **********\n");
-                    }
-                    else {
-                        printf("**************  Have this name!  ****************\n");
-                        AFlag=htons(0x0001);
-                    }
-                    memcpy(&send_buf[6], &AFlag, sizeof(unsigned short));
-
-                    int length=0;
-                    char answer[16];
-                    unsigned short Name = htons(0xc00c);
-                    memcpy(answer, &Name, sizeof(unsigned short));
-                    length += sizeof(unsigned short);
-                    unsigned short TypeA = htons(0x0001);
-                    memcpy(answer + length, &TypeA, sizeof(unsigned short));
-                    length += sizeof(unsigned short);
-
-                    unsigned short ClassA = htons(0x0001);
-                    memcpy(answer + length, &ClassA, sizeof(unsigned short));
-                    length += sizeof(unsigned short);
-
-                    unsigned long timeLive = htonl(0x7b);
-                    memcpy(answer + length, &timeLive, sizeof(unsigned long));
-                    length += sizeof(unsigned long);
-
-                    unsigned short ResourceDataLength = htons(0x0004);
-                    memcpy(answer + length, &ResourceDataLength, sizeof(unsigned short));
-                    length += sizeof(unsigned short);
-                    char* Ip= const_cast<char *>(ip.c_str());
-                    auto IP = (unsigned long)inet_addr(Ip);
-                    memcpy(answer + length, &IP, sizeof(unsigned long));
-                    length += sizeof(unsigned long);
-                    length +=  rec_len;
-                    memcpy(send_buf +  rec_len, answer, length);
-
-                    int isSend;
-                    isSend = sendto(localSoc, send_buf, length, 0, (SOCKADDR*)&receive_in, sizeof(receive_in));
-                    if (!isSend) {
-                        printf("send failed");
-                    }
+                    functions::sendingBack(rece_buff, ip, receive_in, localSoc, rec_len);
                 }
             }
         }
     }
 
     return 0;
-}
-
-void forwardQuery(char *recvBuf, sockaddr_in receive_in){
-    unsigned short* recv_ID;
-    unsigned short send_ID;
-    recv_ID = (unsigned short*)malloc(sizeof(unsigned short*));
-    memcpy(recv_ID, recvBuf, sizeof(unsigned short));    // 收到报文的ID（前2字节）
-    //send_ID = htons(MessageDealer::getNewID(ntohs(*recv_ID), receive_in, FALSE));
 }
