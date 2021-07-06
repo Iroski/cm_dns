@@ -8,32 +8,23 @@
 #include "DNSStore.h"
 extern std::string URL;
 
-static void printDNSInformation(unsigned short ID, int find, std::string ip) {
+void functions::printDNSInformation(unsigned short ID, int find, std::string ip) {
     printf("%d",ID);
     if (find == 0) {
-        printf("RELAY");
+        printf("    RELAY");
         printf("    ");
-        std::cout<< URL <<std::endl;
-        printf("    ");
-        std::cout<< ip <<std::endl;
-        printf("\n");
+        std::cout<< URL<<"    "<<ip <<std::endl;
     }
     else {
         if (ip=="0.0.0.0") {
-            printf("SHIELD");
+            printf("    SHIELD");
             printf("   ");
-            std::cout<< URL <<std::endl;
-            printf("    ");
-            std::cout<< ip <<std::endl;
-            printf("\n");
+            std::cout<< URL<<"    "<<ip <<std::endl;;
         }
         else {
-            printf("LOCAL");
+            printf("    LOCAL");
             printf("    ");
-            std::cout<< URL <<std::endl;
-            printf("    ");
-            std::cout<< ip <<std::endl;
-            printf("\n");
+            std::cout<< URL<<"    "<<ip <<std::endl;
         }
 
     }
