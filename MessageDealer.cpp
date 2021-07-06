@@ -3,6 +3,8 @@
 //
 
 #include "MessageDealer.h"
+extern IDTransform IDTransTable[ID_AMOUNT];
+extern int ID_COUNT;
 
 DNS_HEADER *MessageDealer::getDNSHeader(char *buff) {
     auto *header = new DNS_HEADER();
@@ -181,8 +183,13 @@ std::string MessageDealer::charToIpv4(char *str) {
     return result;
 }
 
-unsigned short *MessageDealer::getNewID(unsigned short *recv_ID, sockaddr_in reveice_in, WINBOOL) {
-    return nullptr;
+unsigned short MessageDealer::getNewID(unsigned short recv_ID, sockaddr_in receive_in, BOOL processed) {
+    IDTransTable[ID_COUNT].oldID = recv_ID;
+    IDTransTable[ID_COUNT].client = receive_in;
+    IDTransTable[ID_COUNT].done = processed;
+    ID_COUNT++;
+
+    return (unsigned short)(ID_COUNT - 1);
 }
 
 void MessageDealer::printResponsesDetailed(const std::vector<DNS_RESPONSE>& responses) {

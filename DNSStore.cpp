@@ -1,6 +1,7 @@
 //
 // Created by 92798 on 2021/7/5.
 //
+#include <stdio.h>
 #include <iostream>
 #include "DNSStore.h"
 #include <fstream>
@@ -9,8 +10,9 @@
 int DNSStoreNum;
 
 std::string DNSStore::getStoredIpByDomain(std::string domain) {
-    if(store_map.count(domain) == 0)
+    if(store_map.count(domain) != 1) {
         return "";
+    }
     return store_map[domain];
 }
 
@@ -37,23 +39,17 @@ void DNSStore::initLocalTable(const std::string Path) {
             break;
         }
     }
-    printf("%d",DNSStoreNum);
     for (int j=0;j<2;j++) {
         std::vector<std::string> res;
         std::string result;
         std::stringstream input(Temp[j]);
         while (input >> result)
             res.push_back(result);
-        store_map[res[0]] = res[1];
+        store_map[res[1]] = res[0];
     }
-    printf("here!");
     for (auto &iter : store_map) {
         std::cout << iter.first << " " << iter.second << std::endl;
     }
     printf("Load records success.\n");
 }
 
-//int DNSStore::checkDomainExist(char *domain) {
-//    std::string domain_str = std::string(domain);
-//    return 0;
-//}

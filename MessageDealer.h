@@ -6,10 +6,12 @@
 #define CM_DNS_CPP_MESSAGEDEALER_H
 #include "define.h"
 #include <winsock2.h>
+#include <windows.h>
 #include <string>
 #include <vector>
 #include <cstring>
 #include <iostream>
+#include "define.h"
 #include <ws2tcpip.h>
 #include "Message.h"
 class MessageDealer {
