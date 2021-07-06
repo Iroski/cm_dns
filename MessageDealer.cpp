@@ -62,7 +62,7 @@ DNS_QUERY *MessageDealer::getDNSQuery(char buff[]) {
     query->name = domain_str;
     query->type = type;
     query->class_ = class_;
-    query->headerAndQueryLength = query_len; //这里是为了读reponse方便，这个长度包含了头部长度以及query长度，需要receiver直接加这个length得到response主体
+    query->headerAndQueryLength = query_len; //这里是为了读response方便，这个长度包含了头部长度以及query长度，需要receiver直接加这个length得到response主体
     return query;
 }
 
@@ -146,3 +146,6 @@ std::string MessageDealer::charToIpv4(char *str) {
     return result.erase(result.find_last_not_of(".") + 1);
 }
 
+unsigned short *MessageDealer::getNewID(unsigned short *recv_ID, sockaddr_in reveice_in, WINBOOL) {
+    return nullptr;
+}

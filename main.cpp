@@ -8,6 +8,10 @@
 #include "MessageDealer.h"
 #include "define.h"
 #include "DNSStore.h"
+
+std::string URL;  //域名
+void forwardQuery(char *recvBuf, sockaddr_in reveice_in);   //将查询转发到本地DNS服务器
+
 int main(){
     //WSA init
     WORD sockVersion = MAKEWORD(2, 2);
@@ -28,6 +32,12 @@ int main(){
     ioctlsocket(serveSoc,FIONBIO,(u_long FAR*)&unBlock);
     ioctlsocket(localSoc,FIONBIO,(u_long FAR*)&unBlock);
     struct sockaddr_in serve_in, local_in,reveice_in;
+//    struct sockaddr_in {
+//        short	sin_family;
+//        u_short	sin_port;
+//        struct in_addr	sin_addr;
+//        char	sin_zero[8];
+//    };
     serve_in.sin_family = AF_INET;
     serve_in.sin_port = htons(PORT);
     serve_in.sin_addr.s_addr = inet_addr(SERVE_DNS_ADDR);
@@ -56,7 +66,17 @@ int main(){
             if(query->type!=1&&query->type!=28){// type not A & AAAA
 
             }else{
+                URL = MessageDealer::getHostName(tmp_ptr); // 读取域名
+                std::string ip = (new DNSStore)->getStoredIpByDomain(URL);   //查看是否在本地表中
+                if(ip == ""){
+                    forwardQuery(tmp_ptr, reveice_in);
+                }
+                else if (ip=="nigeiwoligiaogiao") {
+                    break; // ********************************
+                }
+                else{
 
+                }
             }
         }
 
@@ -64,4 +84,12 @@ int main(){
     }
 
     return 0;
+}
+
+void forwardQuery(char *recvBuf, sockaddr_in reveice_in){
+    unsigned short* recv_ID;
+    unsigned short send_ID;
+    recv_ID = (unsigned short*)malloc(sizeof(unsigned short*));
+    memcpy(recv_ID, recvBuf, sizeof(unsigned short));    // 收到报文的ID（前2字节）
+    send_ID = htons(MessageDealer::getNewID(ntohs(*recv_ID), reveice_in, FALSE));
 }

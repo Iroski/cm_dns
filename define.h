@@ -9,14 +9,19 @@
 #define MAX_BUFFER_SIZE 1024
 #define LOCAL_DNS_ADDR "127.0.0.1"
 #define SERVER_DNS_ADDR "10.3.9.44"
+#define TABLE_SIZE 200
+#define PATH "dnsrelay.txt"
+
 #include <winsock2.h>
 #include <bits/stdc++.h>
+#include <unordered_map>
 //DNS域名解析表结构
-typedef struct dns_entry
-{
-    char * IP;
-    char * domain;
-} DNS_ENTRY;
+
+//typedef struct dns_entry
+//{
+//    char * IP;
+//    char * domain;
+//} DNS_ENTRY;
 typedef struct dns_header{
     u_short ID;
     u_short Flags;
