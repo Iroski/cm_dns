@@ -38,7 +38,7 @@ void DNSStore::initLocalTable(const std::string Path) {
         }
     }
     printf("%d",DNSStoreNum);
-    for (int j=0;j<2;j++) {
+    for (int j=0;j<DNSStoreNum;j++) {
         std::vector<std::string> res;
         std::string result;
         std::stringstream input(Temp[j]);
@@ -46,7 +46,6 @@ void DNSStore::initLocalTable(const std::string Path) {
             res.push_back(result);
         store_map[res[0]] = res[1];
     }
-    printf("here!");
     for (auto &iter : store_map) {
         std::cout << iter.first << " " << iter.second << std::endl;
     }

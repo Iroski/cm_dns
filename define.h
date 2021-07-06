@@ -8,6 +8,7 @@
 #define LOCAL_DNS_ADDR "127.0.0.1"
 #define SERVE_DNS_ADDR "10.3.9.45"
 #define TABLE_SIZE 200
+#define NOT_FOUND 32767
 #define PATH "dnsrelay.txt"
 #include <winsock2.h>
 #include <bits/stdc++.h>
