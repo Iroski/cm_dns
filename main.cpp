@@ -10,7 +10,6 @@
 #include "DNSStore.h"
 
 std::string URL;  //域名
-IDTransform IDTransTable[AMOUNT];	//ID转换表
 void forwardQuery(char *recvBuf, sockaddr_in reveice_in);   //将查询转发到本地DNS服务器
 
 int main(){
@@ -32,7 +31,13 @@ int main(){
     int unBlock=-1;
     ioctlsocket(serveSoc,FIONBIO,(u_long FAR*)&unBlock);
     ioctlsocket(localSoc,FIONBIO,(u_long FAR*)&unBlock);
-    struct sockaddr_in serve_in, local_in, reveice_in;
+    struct sockaddr_in serve_in, local_in,reveice_in;
+//    struct sockaddr_in {
+//        short	sin_family;
+//        u_short	sin_port;
+//        struct in_addr	sin_addr;
+//        char	sin_zero[8];
+//    };
     serve_in.sin_family = AF_INET;
     serve_in.sin_port = htons(PORT);
     serve_in.sin_addr.s_addr = inet_addr(SERVE_DNS_ADDR);
@@ -47,7 +52,6 @@ int main(){
         printf("bind socket success\n");
 
     char rece_buff[MAX_BUFFER_SIZE];
-    int exist_in_table;
     while(1){
         int len_rece = sizeof(reveice_in);
         memset(rece_buff, 0, MAX_BUFFER_SIZE); //将接收缓存先置为全0
@@ -63,12 +67,15 @@ int main(){
 
             }else{
                 URL = MessageDealer::getHostName(tmp_ptr); // 读取域名
-                exist_in_table = (new DNSStore)->checkDomainExist(URL);   //查看是否在本地表中
-                if(exist_in_table){
-
+                std::string ip = (new DNSStore)->getStoredIpByDomain(URL);   //查看是否在本地表中
+                if(ip == ""){
+                    forwardQuery(tmp_ptr, reveice_in);
+                }
+                else if (ip=="nigeiwoligiaogiao") {
+                    break; // ********************************
                 }
                 else{
-                    forwardQuery(tmp_ptr, reveice_in);
+
                 }
             }
         }
