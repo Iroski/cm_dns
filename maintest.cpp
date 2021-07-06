@@ -4,17 +4,35 @@
 #include <windows.h>
 #include <process.h>
 #include <cstring>
+#include <ws2tcpip.h>
 
 #pragma comment(lib, "ws2_32.lib") //加载 ws2_32.dll
 
 #include "MessageDealer.h"
 #include "define.h"
 #include "DNSStore.h"
+#include "DetailedLogDealer.h"
+int getState(char *state);
 
-int main() {
+int main(int argc, char **argv) {
+
+    char *mode = "-dd";
+    char *server_ip = "8.8.8.8";
+    char *file_path = "dnsdelay.txt";
+    if (argc >= 1)
+        mode = argv[1]; //0:-d  1:-dd
+    if (argc >= 2)
+        server_ip = argv[2];
+    if (argc >= 3)
+        file_path = argv[3];
+    int debug_mode=getState(mode);
+
 //    char* str="24098c006c21103d000000ffb00239ab";
+//    char tmp_str[40];//=new char;
 //   std::cout<<MessageDealer::charToIpv6(str)<<std::endl;
-//
+//    char result_char [1024];
+//    inet_ntop(AF_INET6,str,result_char,1024);
+//    std::cout<<result_char<<std::endl;
 //    exit(1);
     //WSA init
     WORD sockVersion = MAKEWORD(2, 2);
@@ -34,13 +52,13 @@ int main() {
     struct sockaddr_in extern_in, local_in, receive_in, server_in;
     extern_in.sin_family = AF_INET;
     extern_in.sin_port = htons(EXTERN_PORT);
-    extern_in.sin_addr.s_addr = 0;
+    extern_in.sin_addr.s_addr = ADDR_ANY;
     local_in.sin_family = AF_INET;
     local_in.sin_port = htons(PORT);
     local_in.sin_addr.s_addr = inet_addr(LOCAL_DNS_ADDR);
     server_in.sin_family = AF_INET;
     server_in.sin_port = htons(PORT);
-    server_in.sin_addr.s_addr = inet_addr(SERVER_DNS_ADDR);
+    server_in.sin_addr.s_addr = inet_addr(server_ip);
     if (bind(localSoc, (LPSOCKADDR) &local_in, sizeof(local_in)) == SOCKET_ERROR) {
         printf("bind error !");
         exit(-1);
@@ -58,52 +76,42 @@ int main() {
     while (true) {
         int len_rece = sizeof(receive_in);
         memset(rece_buff, 0, MAX_BUFFER_SIZE); //将接收缓存先置为全0
-
         int rec_len;
         rec_len = recvfrom(localSoc, rece_buff, sizeof(rece_buff), 0, (struct sockaddr *) &receive_in, &len_rece);
+        char *tmp_ptr = rece_buff;
+        Message local_message=MessageDealer::messageInit(tmp_ptr,false);
+        DetailedLogDealer::receiveLocalInit();
+        DetailedLogDealer::readLocalAddr(rec_len,receive_in);
+        MessageDealer::printDetailedInfo(local_message);
+        unsigned short send_len;
 
-        if (rec_len != -1 && rec_len != 0) {
-            std::cout << rec_len << std::endl;
-            unsigned short iSend;
-            iSend = sendto(externSoc, rece_buff, rec_len, 0, (struct sockaddr *) &server_in, sizeof(server_in));
-            char *tmp_ptr = rece_buff;
-            DNS_HEADER *header = MessageDealer::getDNSHeader(tmp_ptr);
-            DNS_QUERY *query = MessageDealer::getDNSQuery(tmp_ptr);
-            std::cout << iSend << std::endl;
-            MessageDealer::printQueryAll(query);
-            MessageDealer::printHeaderAll(header);
-            std::cout << "send end" << std::endl;
-            clock_t start, stop; //定时
-            double duration = 0;
-            start = clock();
-            rec_len = recvfrom(externSoc, rece_buff, sizeof(rece_buff), 0, nullptr, nullptr); //接受从远端发回的信息
-
-            tmp_ptr = rece_buff;
-            memset(rece_buff, 0, MAX_BUFFER_SIZE);
-            header = MessageDealer::getDNSHeader(tmp_ptr);
-            query = MessageDealer::getDNSQuery(tmp_ptr);
-            while ((rec_len == 0) || (rec_len == SOCKET_ERROR)) {
-                rec_len = recvfrom(externSoc, rece_buff, sizeof(rece_buff), 0, (SOCKADDR *) &receive_in, &len_rece);
-                stop = clock();
-                duration = (double) (stop - start) / CLK_TCK;
-                if (duration > 5) {
-                    printf("Long Time No Response From Server.\n");
-                    rec_len = -1;
-                    break;
-                }
-            }
-            if (rec_len != -1 && rec_len != 0) {
-                char *tmp_ptr = rece_buff;
-                DNS_HEADER *header = MessageDealer::getDNSHeader(tmp_ptr);
-                DNS_QUERY *query = MessageDealer::getDNSQuery(tmp_ptr);
-                MessageDealer::printQueryAll(query);
-                MessageDealer::printHeaderAll(header);
-            }
+        //向外部发包
+        send_len = sendto(externSoc, rece_buff, rec_len, 0, (struct sockaddr *) &server_in, sizeof(server_in));
+        clock_t start, stop; //定时
+        double duration = 0;
+        start = clock();
+        //接收到外部的包
+        rec_len = recvfrom(externSoc, rece_buff, sizeof(rece_buff), 0, nullptr, nullptr); //接受从远端发回的信息
+        tmp_ptr = rece_buff;
+        if (rec_len != 0) {
+            Message message = MessageDealer::messageInit(tmp_ptr, true);
+                std::cout << "----------EXTERN RESPONSE---------" << std::endl;
+                MessageDealer::printDetailedInfo(message);
 
         }
-
-
     }
 
     return 0;
+}
+
+int getState(char *state) {
+    int len = strlen(state);
+    if (memcmp(state, "-dd", len) == 0)
+        return 1;
+    else if (memcmp(state, "-d", len) == 0)
+        return 0;
+    else {
+        std::cout << "wrong input" << std::endl;
+        exit(-1);
+    }
 }
