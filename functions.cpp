@@ -86,7 +86,14 @@ void functions::forwardQuery(char *recvBuf, sockaddr_in receive_in, sockaddr_in 
 }
 
 void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive_in, SOCKET localSoc, int rec_len,std::string type,int debug_mode) {
+    //char send_buf[MAX_BUFFER_SIZE];
+    char *tmp_ptr = rece_buff;
     char send_buf[MAX_BUFFER_SIZE];
+    Message message=MessageDealer::messageInit(tmp_ptr,true);
+    MessageDealer::getDNSHeader(rece_buff);
+    DNS_QUERY *query=message.getQuery();
+    int len=query->headerAndQueryLength;
+    memcpy(send_buf, rece_buff, len);
     unsigned short *pID = (unsigned short *) malloc(sizeof(unsigned short *));
     memcpy(pID, rece_buff, sizeof(unsigned short));
     memcpy(send_buf, rece_buff, rec_len);
@@ -100,41 +107,40 @@ void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive
         unsigned short AFlag = htons(0x8180); //1000 0001 1000 0000
         memcpy(&send_buf[2], &AFlag, sizeof(unsigned short));
     }
-
+    unsigned short ansCount;
     if (ip == "0.0.0.0") {
-        AFlag = htons(0x0000);
+        ansCount = htons(0x0000);
         //printf("**********  No such name!  **********\n");
     } else {
         //printf("**************  Have this name!  ****************\n");
-        AFlag = htons(0x0001);
+        ansCount = htons(0x0001);
     }
-    memcpy(&send_buf[6], &AFlag, sizeof(unsigned short));
+    memcpy(&send_buf[6], &ansCount, sizeof(unsigned short));
 
-    int length = 0;
-    char answer[16];
+    int length = len;
     unsigned short Name = htons(0xc00c);
-    memcpy(answer, &Name, sizeof(unsigned short));
+    memcpy(send_buf+length, &Name, sizeof(unsigned short));
     length += sizeof(unsigned short);
     if (type == "IPV4") {
         unsigned short TypeA = htons(0x0001);
-        memcpy(answer + length, &TypeA, sizeof(unsigned short));
+        memcpy(send_buf+length, &TypeA, sizeof(unsigned short));
     } else if (type=="IPV6"){
         unsigned short TypeAAAA = htons(0x001C);
-        memcpy(answer + length, &TypeAAAA, sizeof(unsigned short));
+        memcpy(send_buf+length, &TypeAAAA, sizeof(unsigned short));
     }
     else {
         unsigned short TypeA = htons(0x0001);
-        memcpy(answer + length, &TypeA, sizeof(unsigned short));
+        memcpy(send_buf+length, &TypeA, sizeof(unsigned short));
     }
     length += sizeof(unsigned short);
 
 
     unsigned short ClassA = htons(0x0001);
-    memcpy(answer + length, &ClassA, sizeof(unsigned short));
+    memcpy(send_buf+length, &ClassA, sizeof(unsigned short));
     length += sizeof(unsigned short);
 
     unsigned long timeLive = htonl(0x7b);
-    memcpy(answer + length, &timeLive, sizeof(unsigned long));
+    memcpy(send_buf+length, &timeLive, sizeof(unsigned long));
     length += sizeof(unsigned long);
     unsigned short ResourceDataLength;
     if (type == "IPV4") {
@@ -144,20 +150,20 @@ void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive
     } else {
         ResourceDataLength = htons(0x0004);
     }
-    memcpy(answer + length, &ResourceDataLength, sizeof(unsigned short));
+    memcpy(send_buf+length, &ResourceDataLength, sizeof(unsigned short));
     length += sizeof(unsigned short);
     char *Ip = const_cast<char *>(ip.c_str());
     auto IP = inet_addr(Ip);
     if (type == "IPV4") {
-        memcpy(answer + length, &IP, sizeof(unsigned long));
+        memcpy(send_buf+length, &IP, sizeof(unsigned long));
+        length += sizeof(unsigned long);
     } else if (type=="IPV6"){
-        memcpy(answer + length, &IP, sizeof(IP));
+        memcpy(send_buf+length, &IP, sizeof(unsigned long)*4);
+        length += sizeof(unsigned long)*4;
     } else {
-        memcpy(answer + length, &IP, sizeof(unsigned long));
+        memcpy(send_buf+length, &IP, sizeof(unsigned long));
+        length += sizeof(unsigned long);
     }
-    length += sizeof(unsigned long);
-    length +=  rec_len;
-    memcpy(send_buf +  rec_len, answer, length);
 
     int isSend;
     isSend = sendto(localSoc, send_buf, length, 0, (SOCKADDR*)&receive_in, sizeof(receive_in));
@@ -171,6 +177,47 @@ void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive
         else{
             SimpleLogDealer::receiveInternal(message);
         }
+    }
+}
+
+void functions::sendBackPTR(char *rece_buff, int rec_len,sockaddr_in receive_in, SOCKET localSoc) {
+    char *tmp_ptr = rece_buff;
+    char send_buf[MAX_BUFFER_SIZE];
+    Message message=MessageDealer::messageInit(tmp_ptr,true);
+    MessageDealer::getDNSHeader(rece_buff);
+    DNS_QUERY *query=message.getQuery();
+    int len=query->headerAndQueryLength;
+    memcpy(send_buf, rece_buff, len);
+    unsigned short AFlag = htons(0x8180); //1000 0001 1000 0000
+    memcpy(&send_buf[2], &AFlag, sizeof(unsigned short));
+    int length=len;
+    unsigned short Name = htons(0xc00c);
+    memcpy(send_buf+length, &Name, sizeof(unsigned short));
+    length += sizeof(unsigned short);
+    unsigned short TypeSOA = htons(0x0006);
+    memcpy(send_buf+length, &TypeSOA, sizeof(unsigned short));
+    length += sizeof(unsigned short);
+
+
+    unsigned short ClassA = htons(0x0001);
+    memcpy(send_buf+length, &ClassA, sizeof(unsigned short));
+    length += sizeof(unsigned short);
+
+    unsigned long timeLive = htonl(0x7b);
+    memcpy(send_buf+length, &timeLive, sizeof(unsigned long));
+    length += sizeof(unsigned long);
+    unsigned short ResourceDataLength;
+    ResourceDataLength = htons(0x0000);
+    memcpy(send_buf+length, &ResourceDataLength, sizeof(unsigned short));
+    length += sizeof(unsigned short);
+
+//    length +=  rec_len;
+//    memcpy(send_buf +  rec_len, answer, length);
+
+    int isSend;
+    isSend = sendto(localSoc, send_buf, length, 0, (SOCKADDR*)&receive_in, sizeof(receive_in));
+    if (!isSend) {
+        printf("send failed");
     }
 }
 
@@ -294,37 +341,5 @@ EM_IP_TYPE functions::Check_IP_V4(std::vector<std::string> vecIpSection) {
     return IP_V4;
 }
 
-void functions::sendBackPTR(char *rece_buff, sockaddr_in receive_in, SOCKET localSoc) {
-    char *tmp_ptr = rece_buff;
-    char send_buf[MAX_BUFFER_SIZE];
-    Message message=MessageDealer::messageInit(tmp_ptr,true);
-    MessageDealer::getDNSHeader(rece_buff);
-    DNS_QUERY *query=message.getQuery();
-    int len=query->headerAndQueryLength;
-    memcpy(send_buf, rece_buff, len);
-    char answer[16];
-    int length=0;
-    unsigned short Name = htons(0xc00c);
-    memcpy(answer, &Name, sizeof(unsigned short));
-    length += sizeof(unsigned short);
-    unsigned short TypeSOA = htons(0x0006);
-    memcpy(answer + length, &TypeSOA, sizeof(unsigned short));
-    length += sizeof(unsigned short);
-
-
-    unsigned short ClassA = htons(0x0001);
-    memcpy(answer + length, &ClassA, sizeof(unsigned short));
-    length += sizeof(unsigned short);
-
-    unsigned long timeLive = htonl(0x7b);
-    memcpy(answer + length, &timeLive, sizeof(unsigned long));
-    length += sizeof(unsigned long);
-
-    int isSend;
-    isSend = sendto(localSoc, send_buf, length, 0, (SOCKADDR*)&receive_in, sizeof(receive_in));
-    if (!isSend) {
-        printf("send failed");
-    }
-}
 
 
