@@ -6,17 +6,13 @@
 
 #include <utility>
 
-
 void DetailedLogDealer::receiveLocal(int len, struct sockaddr_in receive_in, Message message, const std::string& server_ip,
                                      int server_port,char* ptr,int ptr_len) {
     std::cout << "\n\n-----------------------------------NEW QUERY----------------------------------------"
               << std::endl;
-    readLocalAddr(len, receive_in, std::move(server_ip), server_port);
+    readLocalAddr(len, receive_in, server_ip, server_port);
     MessageDealer::printDetailedInfo(std::move(message));
-    for(int i=0;i<ptr_len;++i){
-        printf("%02x ",(uint8_t) ptr[i]);
-    }
-    std::cout<<std::endl;
+    printBinaryInfo(ptr,ptr_len);
 }
 
 void DetailedLogDealer::readLocalAddr(int len, struct sockaddr_in receive_in, const std::string& server_ip, int server_port) {
@@ -35,10 +31,7 @@ void DetailedLogDealer::readLocalAddr(int len, struct sockaddr_in receive_in, co
 void DetailedLogDealer::receiveExternal(Message message,char* ptr,int ptr_len) {
     std::cout << "----------EXTERN RESPONSE---------" << std::endl;
     MessageDealer::printDetailedInfo(std::move(message));
-    for(int i=0;i<ptr_len;++i){
-        printf("%02x ",(uint8_t) ptr[i]);
-    }
-    std::cout<<std::endl;
+    printBinaryInfo(ptr,ptr_len);
 }
 
 void DetailedLogDealer::receiveInternal(const Message &message,char* ptr,int ptr_len) {
@@ -47,6 +40,10 @@ void DetailedLogDealer::receiveInternal(const Message &message,char* ptr,int ptr
     if (MessageDealer::isIntercept(message)) {
         std::cout << "++++++++THIS QUERY IS BE INTERCEPTED++++++++" << std::endl;
     }
+    printBinaryInfo(ptr,ptr_len);
+}
+
+void DetailedLogDealer::printBinaryInfo(char *ptr, int ptr_len) {
     for(int i=0;i<ptr_len;++i){
         printf("%02x ",(uint8_t) ptr[i]);
     }

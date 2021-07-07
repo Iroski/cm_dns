@@ -2,19 +2,13 @@
 // Created by 1 on 2021/7/6.
 //
 
-#include "define.h"
+
 #include "functions.h"
-#include "MessageDealer.h"
-#include "DNSStore.h"
+
 extern std::string URL;
 extern IDTransform IDTransTable[ID_AMOUNT];
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cstdarg>
-#include <vector>
-#include <string>
+
 
 using namespace std;
 
@@ -46,29 +40,24 @@ void functions::forwardQuery(char *recvBuf, sockaddr_in receive_in, sockaddr_in 
     recv_ID = (unsigned short*)malloc(sizeof(unsigned short*));
     memcpy(recv_ID, recvBuf, sizeof(unsigned short));    // 收到报文的ID（前2字节）
     send_ID = htons(MessageDealer::getNewID(ntohs(*recv_ID), receive_in, FALSE));
-    //PrintInfo(ntohs(send_ID), not_find);
     memcpy(recvBuf, &send_ID, sizeof(unsigned short));
     int send_len = sendto(externSoc, recvBuf, len, 0, (struct sockaddr *)&server_in, sizeof(server_in));
     free(recv_ID);
 
-    DNS_HEADER *header = MessageDealer::getDNSHeader(recvBuf);
-    DNS_QUERY *query = MessageDealer::getDNSQuery(recvBuf);
-    //std::cout << send_len << std::endl;
-    //std::cout << "send end" << std::endl;
-
-    clock_t start, stop; //定时
-    double duration = 0;
-    start = clock();
-    int size = sizeof(server_in);
+    //clock_t start, stop; //定时
+    //double duration = 0;
+    //start = clock();
     int recv_len = recvfrom(externSoc, recvBuf, MAX_BUFFER_SIZE, 0, nullptr, nullptr); //接受从远端发回的信息
 
     if (recv_len != -1 && recv_len != 0) {
         char *tmp_ptr = recvBuf;
         Message message = MessageDealer::messageInit(tmp_ptr, true);
-        if(debugMode)
+        if(debugMode){
             DetailedLogDealer::receiveExternal(message,tmp_ptr,recv_len);
-//        std::cout << recv_len << std::endl;
-//        std::cout << "receive end" << std::endl;
+        }
+       else {
+            SimpleLogDealer::receiveExternal(message);
+        }
     }
 
     //ID转换
@@ -167,11 +156,14 @@ void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive
     if (!isSend) {
         printf("send failed");
     }else{
-        Message message=MessageDealer::messageInit(send_buf,true);
-        if(debug_mode)
-            DetailedLogDealer::receiveInternal(message,send_buf,sizeof(send_buf));
+        Message message = MessageDealer::messageInit(send_buf,true);
+        if(debug_mode){
+            DetailedLogDealer::receiveInternal(message,send_buf,isSend);
+        }
+        else{
+            SimpleLogDealer::receiveInternal(message);
+        }
     }
-
 }
 
 void functions::str_split(const string &str, const string &sign, vector<std::string> &results) {
@@ -292,6 +284,39 @@ EM_IP_TYPE functions::Check_IP_V4(std::vector<std::string> vecIpSection) {
     }
 
     return IP_V4;
+}
+
+void functions::sendBackPTR(char *rece_buff, sockaddr_in receive_in, SOCKET localSoc) {
+    char *tmp_ptr = rece_buff;
+    char send_buf[MAX_BUFFER_SIZE];
+    Message message=MessageDealer::messageInit(tmp_ptr,true);
+    MessageDealer::getDNSHeader(rece_buff); //todo 这里有啥用？
+    DNS_QUERY *query=message.getQuery();
+    int len=query->headerAndQueryLength;
+    memcpy(send_buf, rece_buff, len);
+    char answer[16];
+    int length=0;
+    unsigned short Name = htons(0xc00c);
+    memcpy(answer, &Name, sizeof(unsigned short));
+    length += sizeof(unsigned short);
+    unsigned short TypeSOA = htons(0x0006);
+    memcpy(answer + length, &TypeSOA, sizeof(unsigned short));
+    length += sizeof(unsigned short);
+
+
+    unsigned short ClassA = htons(0x0001);
+    memcpy(answer + length, &ClassA, sizeof(unsigned short));
+    length += sizeof(unsigned short);
+
+    unsigned long timeLive = htonl(0x7b);
+    memcpy(answer + length, &timeLive, sizeof(unsigned long));
+    length += sizeof(unsigned long);
+
+    int isSend;
+    isSend = sendto(localSoc, send_buf, length, 0, (SOCKADDR*)&receive_in, sizeof(receive_in));
+    if (!isSend) {
+        printf("send failed");
+    }
 }
 
 

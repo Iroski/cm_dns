@@ -1,7 +1,6 @@
 //
 // Created by 92798 on 2021/7/5.
 //
-
 #include "MessageDealer.h"
 extern IDTransform IDTransTable[ID_AMOUNT];
 extern int ID_COUNT;
@@ -41,10 +40,7 @@ std::string MessageDealer::getHostName(char *buff, char *domain_start_ptr) {
             break;
         }
         if (domain[i] < 33)
-            if (i > 0 && i < len)
-                domain[i] = '.';
-            else
-                domain[i] = ' ';
+            domain[i] = '.';
     }
     std::string domain_str = domain;
     if(c0label!=-1){
@@ -54,7 +50,7 @@ std::string MessageDealer::getHostName(char *buff, char *domain_start_ptr) {
         domain_str.append(".");
         domain_str.append(MessageDealer::getHostName(data_start_str,domain_start_ptr));
     }
-    domain_str.erase(0, domain_str.find_first_not_of(" ")).erase(domain_str.find_last_not_of(" ") + 1);
+    domain_str.erase(0, domain_str.find_first_not_of(".")).erase(domain_str.find_last_not_of(".") + 1);
     return domain_str;
 }
 
@@ -196,7 +192,11 @@ unsigned short MessageDealer::getNewID(unsigned short recv_ID, sockaddr_in recei
 
 void MessageDealer::printResponsesDetailed(const std::vector<DNS_RESPONSE>& responses) {
     int count=1;
-
+    if(responses.empty())
+    {
+        std::cout<<"No Answer"<<std::endl;
+        return;
+    }
     for(const auto & response : responses){
         std::cout<<"Response: "<<"count: "<<count<<" name:"<<response.name<<" type:"<<response.type
                      <<" class:"<<response.class_<<" ttl:"<<response.ttl<<" dataLength:"<<response.data_length<<" data:"<<response.data<<std::endl;
@@ -219,6 +219,25 @@ void MessageDealer::printDetailedInfo(Message message) {
     MessageDealer::printHeaderDetailed(message.getHeader());
     MessageDealer::printQueryDetailed(message.getQuery());
     MessageDealer::printResponsesDetailed(message.getResponses());
+}
+
+void MessageDealer::printQuerySimple(DNS_QUERY *query) {
+    std::cout <<"QuerySimpleInfo:  "<<"domain name:"<< query->name << "  type:" << query->type << std::endl;
+}
+
+void MessageDealer::printResponsesSimple(const std::vector<DNS_RESPONSE> &responses) {
+    int count = 1;
+
+    if(responses.empty())
+    {
+        std::cout<<"No Answer"<<std::endl;
+        return;
+    }
+    for (const auto &response : responses) {
+        if (response.type == "IPV4" || response.type == "IPV6")
+            std::cout << "Response: " << " data: " << response.data << std::endl;
+        ++count;
+    }
 }
 
 bool MessageDealer::isIntercept(Message message) {
