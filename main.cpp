@@ -34,7 +34,8 @@ int main(int argc, char **argv) {
         return -1;
     }
     DNSStore store;
-    store.initLocalTable(PATH);
+    std::string a(file_path);
+    store.initLocalTable(a);
 
     //创建套接字
     SOCKET externSoc = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
