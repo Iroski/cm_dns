@@ -4,9 +4,7 @@
 #include <windows.h>
 #include <process.h>
 #include <cstring>
-
 #pragma comment(lib, "ws2_32.lib") //加载 ws2_32.dll
-
 #include "MessageDealer.h"
 #include "define.h"
 #include "DNSStore.h"
@@ -30,7 +28,7 @@ int main(int argc, char **argv) {
     if (argc >= 3)
         file_path = argv[3];
     int debug_mode = getState(mode);
-    std::cout << "debug_mode:" << mode << " " << debug_mode << std::endl;
+    std::cout << "debug_mode:" << mode << std::endl;
     //WSA init
     WORD sockVersion = MAKEWORD(2, 2);
     WSADATA wsaData;
@@ -38,7 +36,8 @@ int main(int argc, char **argv) {
         return -1;
     }
     DNSStore store;
-    store.initLocalTable(PATH);
+    std::string a(file_path);
+    store.initLocalTable(a);
 
     //创建套接字
     SOCKET externSoc = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -57,18 +56,20 @@ int main(int argc, char **argv) {
     local_in.sin_addr.s_addr = inet_addr(LOCAL_DNS_ADDR);
     server_in.sin_family = AF_INET;
     server_in.sin_port = htons(PORT);
-    server_in.sin_addr.s_addr = inet_addr(SERVER_DNS_ADDR);
+    server_in.sin_addr.s_addr = inet_addr(server_ip);
     if (bind(localSoc, (LPSOCKADDR) &local_in, sizeof(local_in)) == SOCKET_ERROR) {
-        printf("bind error !");
+        std::cout << "bind error !" << std::endl;
         exit(-1);
     } else {
-        printf("bind socket success for test\n");
+        if (debug_mode)
+            std::cout << "bind local dns relay socket,port:" << PORT << std::endl;
     }
     if (bind(externSoc, (LPSOCKADDR) &extern_in, sizeof(extern_in)) == SOCKET_ERROR) {
-        printf("bind error !");
+        std::cout << "bind error !" << std::endl;
         exit(-1);
     } else {
-        printf("bind socket success for test\n");
+        if (debug_mode)
+            std::cout << "bind local socket to server, port:" << EXTERN_PORT << std::endl;
     }
 
     char rece_buff[MAX_BUFFER_SIZE];
@@ -78,27 +79,39 @@ int main(int argc, char **argv) {
         memset(rece_buff, 0, MAX_BUFFER_SIZE); //将接收缓存先置为全0
 
         int rec_len;
-        rec_len = recvfrom(localSoc, rece_buff, sizeof(rece_buff), 0, (struct sockaddr *) &receive_in, &len_rece); //收到local
-        if(rec_len!=-1&&rec_len!=0){
+        rec_len = recvfrom(localSoc, rece_buff, sizeof(rece_buff), 0, (struct sockaddr *) &receive_in,
+                           &len_rece); //收到local
+        if (rec_len != -1 && rec_len != 0) {
+            std::string type;
             char *tmp_ptr = rece_buff;
             Message local_message=MessageDealer::messageInit(tmp_ptr,false);
             if(debug_mode)
-                DetailedLogDealer::receiveLocal(rec_len,receive_in,local_message);
+                DetailedLogDealer::receiveLocal(rec_len, receive_in, local_message, server_ip, PORT,tmp_ptr,rec_len);
             else
                 SimpleLogDealer::receiveLocal(rec_len,receive_in,local_message);
 
             DNS_QUERY *query = local_message.getQuery();
             if (query->type != "IPV4" && query->type != "IPV6") {// type not A & AAAA
-
+                if(query->type=="PTR"){
+                    functions::sendBackPTR(rece_buff,receive_in,localSoc);
+                }
             } else {
+                type = query->type;
                 URL = MessageDealer::getHostName(tmp_ptr + 12, tmp_ptr); // 读取域名
                 std::string ip = store.getStoredIpByDomain(URL);   //查看是否在本地表中
+                EM_IP_TYPE ipType = IP_UNKNOW;
+                functions function;
+                ipType = function.Check_IP(ip);
                 if (ip.empty()) {
                     functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len, debug_mode);
                 } else if (ip == "nigeiwoligiaogiao") {
                     break; // ********************************
                 } else {
-                    functions::sendingBack(rece_buff, ip, receive_in, localSoc, rec_len, debug_mode);
+                    if ((function.Get_Type_Name(ipType)!=type)) {
+                        functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len, debug_mode);
+                    }
+                    else
+                        functions::sendingBack(rece_buff, ip, receive_in, localSoc, rec_len,type, debug_mode);
                 }
             }
         }

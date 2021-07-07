@@ -10,10 +10,10 @@ DNS_HEADER *MessageDealer::getDNSHeader(char *buff) {
     char *tmp_ptr = buff;
     u_short t_id = ntohs(*(u_short *) tmp_ptr);
     tmp_ptr += sizeof(t_id);
-    u_short question = ntohs(*(u_short *) tmp_ptr);
-    tmp_ptr += sizeof(question);
     u_short flags = ntohs(*(u_short *) tmp_ptr);
     tmp_ptr += sizeof(flags);
+    u_short question = ntohs(*(u_short *) tmp_ptr);
+    tmp_ptr += sizeof(question);
     u_short answer_rr = ntohs(*(u_short *) tmp_ptr);
     tmp_ptr += sizeof(flags);
     u_short authority_rr = ntohs(*(u_short *) tmp_ptr);
@@ -53,7 +53,8 @@ std::string MessageDealer::getHostName(char *buff, char *domain_start_ptr) {
         domain_str.append(".");
         domain_str.append(MessageDealer::getHostName(data_start_str,domain_start_ptr));
     }
-    domain_str.erase(0, domain_str.find_first_not_of(" ")).erase(domain_str.find_last_not_of(" ") + 1);
+    domain_str.erase(0, domain_str.find_first_not_of(" ")).erase(domain_str.find_last_not_of(" ") + 1)
+    .erase(0, domain_str.find_first_not_of(".")).erase(domain_str.find_last_not_of(".") + 1);
     return domain_str;
 }
 
@@ -74,6 +75,8 @@ DNS_QUERY *MessageDealer::getDNSQuery(char *buff) {
         query->type="IPV4";
     else if(type==28)
         query->type="IPV6";
+    else if(type==12)
+        query->type="PTR";
     else
         query->type=std::to_string(type);
     query->class_ = class_;
@@ -193,7 +196,11 @@ unsigned short MessageDealer::getNewID(unsigned short recv_ID, sockaddr_in recei
 
 void MessageDealer::printResponsesDetailed(const std::vector<DNS_RESPONSE>& responses) {
     int count=1;
-
+    if(responses.empty())
+    {
+        std::cout<<"No Answer"<<std::endl;
+        return;
+    }
     for(const auto & response : responses){
         std::cout<<"Response: "<<"count: "<<count<<" name:"<<response.name<<" type:"<<response.type
                      <<" class:"<<response.class_<<" ttl:"<<response.ttl<<" dataLength:"<<response.data_length<<" data:"<<response.data<<std::endl;
@@ -223,13 +230,23 @@ void MessageDealer::printQuerySimple(DNS_QUERY *query) {
 }
 
 void MessageDealer::printResponsesSimple(const std::vector<DNS_RESPONSE> &responses) {
-    int count=1;
+    int count = 1;
 
-    for(const auto & response : responses){
-        if(response.type=="IPV4"||response.type=="IPV6")
-            std::cout<<"Response: "<<" data: "<<response.data<<std::endl;
+    if(responses.empty())
+    {
+        std::cout<<"No Answer"<<std::endl;
+        return;
+    }
+    for (const auto &response : responses) {
+        if (response.type == "IPV4" || response.type == "IPV6")
+            std::cout << "Response: " << " data: " << response.data << std::endl;
         ++count;
     }
+}
+
+bool MessageDealer::isIntercept(Message message) {
+    int flag=message.getHeader()->flags;
+    return flag%16==3;
 }
 
 

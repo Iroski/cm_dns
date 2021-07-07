@@ -11,7 +11,6 @@
 #define SERVER_DNS_ADDR "10.3.9.44"
 #define TABLE_SIZE 200
 #define ID_AMOUNT 2000
-#define PATH "dnsrelay.txt"
 
 #include <winsock2.h>
 #include <windows.h>
@@ -30,5 +29,12 @@ typedef struct IDChange//ID转换表结构
     BOOL done;						//标记是否完成解析
     SOCKADDR_IN client;				//请求者套接字地址
 }IDTransform;
+
+enum EM_IP_TYPE
+{
+    IP_V4 = 0,
+    IP_V6,
+    IP_UNKNOW,
+};
 
 #endif //CM_DNS_CPP_DEFINE_H
