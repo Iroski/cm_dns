@@ -80,11 +80,10 @@ int main(int argc, char **argv) {
         if(rec_len!=-1&&rec_len!=0){
             char *tmp_ptr = rece_buff;
             Message local_message=MessageDealer::messageInit(tmp_ptr,false);
-            DetailedLogDealer::receiveLocalInit();
-            DetailedLogDealer::readLocalAddr(rec_len,receive_in);
-            MessageDealer::printDetailedInfo(local_message);
-            DNS_QUERY *query = local_message.getQuery();
+            if(debug_mode)
+                DetailedLogDealer::receiveLocal(rec_len,receive_in,local_message);
 
+            DNS_QUERY *query = local_message.getQuery();
             if (query->type != "IPV4" && query->type != "IPV6") {// type not A & AAAA
 
             } else {
@@ -95,7 +94,7 @@ int main(int argc, char **argv) {
                 } else if (ip == "nigeiwoligiaogiao") {
                     break; // ********************************
                 } else {
-                    functions::sendingBack(rece_buff, ip, receive_in, localSoc, rec_len);
+                    functions::sendingBack(rece_buff, ip, receive_in, localSoc, rec_len,debug_mode);
                 }
             }
         }

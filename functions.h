@@ -14,7 +14,7 @@ class functions {
     public:
         static void printDNSInformation(unsigned short ID, int find, std::string ip);
         static void forwardQuery(char *recvBuf, sockaddr_in reveice_in, sockaddr_in server_in, SOCKET &externSoc, SOCKET localSoc, int len, int debugMode);
-        static void sendingBack(char *rece_buff, std::string ip, sockaddr_in receive_in, SOCKET localSoc, int rec_len);
+        static void sendingBack(char *rece_buff, std::string ip, sockaddr_in receive_in, SOCKET localSoc, int rec_len,int debug_mode);
 };
 
 

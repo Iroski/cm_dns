@@ -8,11 +8,14 @@
 #include<iostream>
 #include <WinSock2.h>
 #include <windows.h>
+#include <utility>
 #include "MessageDealer.h"
+#include "Message.h"
 class DetailedLogDealer {
 public:
-     static void receiveLocalInit();
-    static void externalInit();
+     static void receiveLocal(int len, struct sockaddr_in receive_in,Message message);
+    static void receiveInternal(Message message);
+    static void receiveExternal(Message message);
      static void readLocalAddr(int len, struct sockaddr_in receive_in);
 };
 
