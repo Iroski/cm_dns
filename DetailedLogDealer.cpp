@@ -3,7 +3,6 @@
 //
 
 #include "DetailedLogDealer.h"
-
 #include <utility>
 
 
