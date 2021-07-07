@@ -4,9 +4,7 @@
 #include <windows.h>
 #include <process.h>
 #include <cstring>
-
 #pragma comment(lib, "ws2_32.lib") //加载 ws2_32.dll
-
 #include "MessageDealer.h"
 #include "define.h"
 #include "DNSStore.h"
@@ -78,6 +76,7 @@ int main(int argc, char **argv) {
         int rec_len;
         rec_len = recvfrom(localSoc, rece_buff, sizeof(rece_buff), 0, (struct sockaddr *) &receive_in, &len_rece); //收到local
         if(rec_len!=-1&&rec_len!=0){
+            std::string type;
             char *tmp_ptr = rece_buff;
             Message local_message=MessageDealer::messageInit(tmp_ptr,false);
             DetailedLogDealer::receiveLocalInit();
@@ -86,16 +85,27 @@ int main(int argc, char **argv) {
             DNS_QUERY *query = local_message.getQuery();
 
             if (query->type != "IPV4" && query->type != "IPV6") {// type not A & AAAA
-
+                if(query->type=="PTR"){
+                    char *tmp_ptr = rece_buff;
+                    Message message=MessageDealer::messageInit(tmp_ptr,true);
+                    MessageDealer::getDNSHeader(rece_buff);
+                }
             } else {
+                type=query->type;
                 URL = MessageDealer::getHostName(tmp_ptr + 12, tmp_ptr); // 读取域名
                 std::string ip = store.getStoredIpByDomain(URL);   //查看是否在本地表中
+                EM_IP_TYPE ipType= IP_UNKNOW;
+                functions function;
+                ipType=function.Check_IP(ip);
                 if (ip.empty()) {
                     functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len,debug_mode);
                 } else if (ip == "nigeiwoligiaogiao") {
                     break; // ********************************
                 } else {
-                    functions::sendingBack(rece_buff, ip, receive_in, localSoc, rec_len);
+                    if ((ipType==IP_V4&&type=="IPV6")||(ipType==IP_V6&&type=="IPV4")) {
+                        functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len,debug_mode);
+                    }
+                    functions::sendingBack(rece_buff, ip, receive_in, localSoc, rec_len,type);
                 }
             }
         }

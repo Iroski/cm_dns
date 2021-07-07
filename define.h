@@ -31,4 +31,11 @@ typedef struct IDChange//ID转换表结构
     SOCKADDR_IN client;				//请求者套接字地址
 }IDTransform;
 
+enum EM_IP_TYPE
+{
+    IP_V4 = 0,
+    IP_V6,
+    IP_UNKNOW,
+};
+
 #endif //CM_DNS_CPP_DEFINE_H

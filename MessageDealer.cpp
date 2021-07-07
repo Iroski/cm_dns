@@ -75,6 +75,8 @@ DNS_QUERY *MessageDealer::getDNSQuery(char *buff) {
         query->type="IPV4";
     else if(type==28)
         query->type="IPV6";
+    else if(type==12)
+        query->type="PTR";
     else
         query->type=std::to_string(type);
     query->class_ = class_;
