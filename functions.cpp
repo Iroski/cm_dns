@@ -105,11 +105,15 @@ void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive
     if (ip == "0.0.0.0") {
         unsigned short AFlag = htons(0x8183); //1000 0001 1000 0011
         memcpy(&send_buf[2], &AFlag, sizeof(unsigned short));
-        AFlag = htons(0x0000);
-        printf("**********  No such name!  **********\n");
     } else {
         unsigned short AFlag = htons(0x8180); //1000 0001 1000 0000
         memcpy(&send_buf[2], &AFlag, sizeof(unsigned short));
+    }
+
+    if (ip == "0.0.0.0") {
+        AFlag = htons(0x0000);
+        printf("**********  No such name!  **********\n");
+    } else {
         printf("**************  Have this name!  ****************\n");
         AFlag = htons(0x0001);
     }
@@ -123,10 +127,13 @@ void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive
     if (type == "IPV4") {
         unsigned short TypeA = htons(0x0001);
         memcpy(answer + length, &TypeA, sizeof(unsigned short));
-    }
-    else {
+    } else if (type=="IPV6"){
         unsigned short TypeAAAA = htons(0x001C);
         memcpy(answer + length, &TypeAAAA, sizeof(unsigned short));
+    }
+    else {
+        unsigned short TypeA = htons(0x0001);
+        memcpy(answer + length, &TypeA, sizeof(unsigned short));
     }
     length += sizeof(unsigned short);
 
@@ -139,17 +146,24 @@ void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive
     memcpy(answer + length, &timeLive, sizeof(unsigned long));
     length += sizeof(unsigned long);
     unsigned short ResourceDataLength;
-    if (type=="IPV4") {
+    if (type == "IPV4") {
         ResourceDataLength = htons(0x0004);
-    }
-    else {
+    } else if (type=="IPV6"){
         ResourceDataLength = htons(0x0010);
+    } else {
+        ResourceDataLength = htons(0x0004);
     }
     memcpy(answer + length, &ResourceDataLength, sizeof(unsigned short));
     length += sizeof(unsigned short);
-    char* Ip= const_cast<char *>(ip.c_str());
+    char *Ip = const_cast<char *>(ip.c_str());
     auto IP = inet_addr(Ip);
-    memcpy(answer + length, &IP, sizeof(IP));
+    if (type == "IPV4") {
+        memcpy(answer + length, &IP, sizeof(unsigned long));
+    } else if (type=="IPV6"){
+        memcpy(answer + length, &IP, sizeof(IP));
+    } else {
+        memcpy(answer + length, &IP, sizeof(unsigned long));
+    }
     length += sizeof(unsigned long);
     length +=  rec_len;
     memcpy(send_buf +  rec_len, answer, length);
