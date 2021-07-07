@@ -9,10 +9,10 @@
 extern std::string URL;
 extern IDTransform IDTransTable[ID_AMOUNT];
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cstdarg>
 #include <vector>
 #include <string>
 
@@ -65,13 +65,8 @@ void functions::forwardQuery(char *recvBuf, sockaddr_in receive_in, sockaddr_in 
     if (recv_len != -1 && recv_len != 0) {
         char *tmp_ptr = recvBuf;
         Message message = MessageDealer::messageInit(tmp_ptr, true);
-        DetailedLogDealer::externalInit();
-        MessageDealer::printDetailedInfo(message);
-//        if(message.getQuery()->type=="IPV6"){
-//            std::cout<<"Start IPV6 process"<<std::endl;
-//        }
-//        DNS_HEADER *header = MessageDealer::getDNSHeader(tmp_ptr);
-//        DNS_QUERY *query = MessageDealer::getDNSQuery(tmp_ptr);
+        if(debugMode)
+            DetailedLogDealer::receiveExternal(message,tmp_ptr,recv_len);
 //        std::cout << recv_len << std::endl;
 //        std::cout << "receive end" << std::endl;
     }
@@ -93,14 +88,13 @@ void functions::forwardQuery(char *recvBuf, sockaddr_in receive_in, sockaddr_in 
 //    free(recv_ID); //释放动态分配的内存
 }
 
-void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive_in, SOCKET localSoc, int rec_len,std::string type) {
-
+void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive_in, SOCKET localSoc, int rec_len,std::string type,int debug_mode) {
     char send_buf[MAX_BUFFER_SIZE];
     unsigned short *pID = (unsigned short *) malloc(sizeof(unsigned short *));
     memcpy(pID, rece_buff, sizeof(unsigned short));
     memcpy(send_buf, rece_buff, rec_len);
     unsigned short nID = htons(MessageDealer::getNewID(ntohs(*pID), receive_in, FALSE));;//***********************
-    functions::printDNSInformation(nID, 1, ip);
+    //functions::printDNSInformation(nID, 1, ip);
     unsigned short AFlag;
     if (ip == "0.0.0.0") {
         unsigned short AFlag = htons(0x8183); //1000 0001 1000 0011
@@ -112,9 +106,9 @@ void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive
 
     if (ip == "0.0.0.0") {
         AFlag = htons(0x0000);
-        printf("**********  No such name!  **********\n");
+        //printf("**********  No such name!  **********\n");
     } else {
-        printf("**************  Have this name!  ****************\n");
+        //printf("**************  Have this name!  ****************\n");
         AFlag = htons(0x0001);
     }
     memcpy(&send_buf[6], &AFlag, sizeof(unsigned short));
@@ -172,7 +166,12 @@ void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive
     isSend = sendto(localSoc, send_buf, length, 0, (SOCKADDR*)&receive_in, sizeof(receive_in));
     if (!isSend) {
         printf("send failed");
+    }else{
+        Message message=MessageDealer::messageInit(send_buf,true);
+        if(debug_mode)
+            DetailedLogDealer::receiveInternal(message,send_buf,sizeof(send_buf));
     }
+
 }
 
 void functions::str_split(const string &str, const string &sign, vector<std::string> &results) {
