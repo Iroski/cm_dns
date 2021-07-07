@@ -11,10 +11,10 @@ DNS_HEADER *MessageDealer::getDNSHeader(char *buff) {
     char *tmp_ptr = buff;
     u_short t_id = ntohs(*(u_short *) tmp_ptr);
     tmp_ptr += sizeof(t_id);
-    u_short question = ntohs(*(u_short *) tmp_ptr);
-    tmp_ptr += sizeof(question);
     u_short flags = ntohs(*(u_short *) tmp_ptr);
     tmp_ptr += sizeof(flags);
+    u_short question = ntohs(*(u_short *) tmp_ptr);
+    tmp_ptr += sizeof(question);
     u_short answer_rr = ntohs(*(u_short *) tmp_ptr);
     tmp_ptr += sizeof(flags);
     u_short authority_rr = ntohs(*(u_short *) tmp_ptr);
@@ -217,6 +217,11 @@ void MessageDealer::printDetailedInfo(Message message) {
     MessageDealer::printHeaderDetailed(message.getHeader());
     MessageDealer::printQueryDetailed(message.getQuery());
     MessageDealer::printResponsesDetailed(message.getResponses());
+}
+
+bool MessageDealer::isIntercept(Message message) {
+    int flag=message.getHeader()->flags;
+    return flag%16==3;
 }
 
 

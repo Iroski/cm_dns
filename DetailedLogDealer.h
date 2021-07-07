@@ -14,7 +14,7 @@
 class DetailedLogDealer {
 public:
      static void receiveLocal(int len, struct sockaddr_in receive_in,Message message);
-    static void receiveInternal(Message message);
+    static void receiveInternal(const Message& message);
     static void receiveExternal(Message message);
      static void readLocalAddr(int len, struct sockaddr_in receive_in);
 };

@@ -4,11 +4,13 @@
 
 #include "DetailedLogDealer.h"
 
+#include <utility>
 
 
-void DetailedLogDealer::receiveLocal(int len, struct sockaddr_in receive_in,Message message) {
-    std::cout<<"\n\n-----------------------------------NEW QUERY----------------------------------------"<<std::endl;
-    readLocalAddr(len,receive_in);
+void DetailedLogDealer::receiveLocal(int len, struct sockaddr_in receive_in, Message message) {
+    std::cout << "\n\n-----------------------------------NEW QUERY----------------------------------------"
+              << std::endl;
+    readLocalAddr(len, receive_in);
     MessageDealer::printDetailedInfo(std::move(message));
 }
 
@@ -16,16 +18,20 @@ void DetailedLogDealer::readLocalAddr(int len, struct sockaddr_in receive_in) {
     long q = receive_in.sin_addr.s_addr;
     char s[40];
     sprintf(s, "%ld", q);
-    std::cout<<"Received from local : "<<MessageDealer::charToIpv4(s)<<":"<<receive_in.sin_port<<" ("<<len<<" bytes)"<<std::endl;
+    std::cout << "Received from local : " << MessageDealer::charToIpv4(s) << ":" << receive_in.sin_port << " (" << len
+              << " bytes)" << std::endl;
 }
 
 void DetailedLogDealer::receiveExternal(Message message) {
     std::cout << "----------EXTERN RESPONSE---------" << std::endl;
-    MessageDealer::printDetailedInfo(message);
+    MessageDealer::printDetailedInfo(std::move(message));
 }
 
-void DetailedLogDealer::receiveInternal(Message message) {
+void DetailedLogDealer::receiveInternal(const Message &message) {
     std::cout << "----------INTERNAL RESPONSE---------" << std::endl;
     MessageDealer::printDetailedInfo(message);
+    if (MessageDealer::isIntercept(message)) {
+        std::cout << "++++++++THIS QUERY IS BE INTERCEPTED++++++++" << std::endl;
+    }
 }
 
