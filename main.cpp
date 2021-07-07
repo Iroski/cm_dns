@@ -84,7 +84,7 @@ int main(){
                     memcpy(pID, rece_buff, sizeof(unsigned short));
                     memcpy(send_buf,rece_buff,rec_len);
                     unsigned short nID=11;//***********************
-                    unsigned short AFlag=htons(0x8180);
+                    unsigned short AFlag=htons(0x8180); //1000 0001 1000 0000
                     memcpy(&send_buf[2], &AFlag, sizeof(unsigned short));
                     functions::printDNSInformation(nID,1,ip);
                     if (ip=="0.0.0.0") {
