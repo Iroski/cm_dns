@@ -18,6 +18,7 @@ public:
     static void receiveInternal(const Message& message,char* ptr,int ptr_len);
     static void receiveExternal(Message message,char* ptr,int ptr_len);
      static void readLocalAddr(int len, struct sockaddr_in receive_in,const std::string& server_ip, int server_port);
+     static void printBinaryInfo(char* ptr, int ptr_len);
 };
 
 #endif //CM_DNS_CPP_DETAILEDLOGDEALER_H
