@@ -4,17 +4,31 @@
 #include <windows.h>
 #include <process.h>
 #include <cstring>
+
 #pragma comment(lib, "ws2_32.lib") //加载 ws2_32.dll
+
 #include "MessageDealer.h"
 #include "define.h"
 #include "DNSStore.h"
 #include "functions.h"
+#include "DetailedLogDealer.h"
 
 std::string URL;  //域名
 int ID_COUNT;
-IDTransform IDTransTable[ID_AMOUNT];	//ID转换表
+IDTransform IDTransTable[ID_AMOUNT];    //ID转换表
+int getState(char *state);
+int main(int argc, char **argv) {
 
-int main(){
+    char *mode = "-dd";
+    char *server_ip = "8.8.8.8";
+    char *file_path = "dnsdelay.txt";
+    if (argc >= 1)
+        mode = argv[1]; //0:-d  1:-dd
+    if (argc >= 2)
+        server_ip = argv[2];
+    if (argc >= 3)
+        file_path = argv[3];
+    int debug_mode=getState(mode);
     //WSA init
     WORD sockVersion = MAKEWORD(2, 2);
     WSADATA wsaData;
@@ -56,31 +70,31 @@ int main(){
     }
 
     char rece_buff[MAX_BUFFER_SIZE];
-    while(1){
+    while (1) {
+//        std::cout<<"new round"<<std::endl;
         int len_rece = sizeof(receive_in);
         memset(rece_buff, 0, MAX_BUFFER_SIZE); //将接收缓存先置为全0
 
         int rec_len;
-        rec_len= recvfrom(localSoc, rece_buff, sizeof(rece_buff), 0, (struct sockaddr *)&receive_in, &len_rece);
+        rec_len = recvfrom(localSoc, rece_buff, sizeof(rece_buff), 0, (struct sockaddr *) &receive_in, &len_rece); //收到local
+        if(rec_len!=-1&&rec_len!=0){
+            char *tmp_ptr = rece_buff;
+            Message local_message=MessageDealer::messageInit(tmp_ptr,false);
+            DetailedLogDealer::receiveLocalInit();
+            DetailedLogDealer::readLocalAddr(rec_len,receive_in);
+            MessageDealer::printDetailedInfo(local_message);
+            DNS_QUERY *query = local_message.getQuery();
 
-        if(rec_len != -1 && rec_len != 0) {
-            char* tmp_ptr=rece_buff;
-            DNS_HEADER* header=MessageDealer::getDNSHeader(tmp_ptr);
-            DNS_QUERY * query=MessageDealer::getDNSQuery(tmp_ptr);
-            if(query->type!=1&&query->type!=28) {// type not A & AAAA
+            if (query->type != "IPV4" && query->type != "IPV6") {// type not A & AAAA
 
-            }
-            else {
-                URL = MessageDealer::getHostName(tmp_ptr); // 读取域名
+            } else {
+                URL = MessageDealer::getHostName(tmp_ptr + 12, tmp_ptr); // 读取域名
                 std::string ip = store.getStoredIpByDomain(URL);   //查看是否在本地表中
-                if(ip == ""){
-                    functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len);
-                }
-                else if (ip=="nigeiwoligiaogiao") {
+                if (ip.empty()) {
+                    functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len,debug_mode);
+                } else if (ip == "nigeiwoligiaogiao") {
                     break; // ********************************
-                }
-
-                else{
+                } else {
                     functions::sendingBack(rece_buff, ip, receive_in, localSoc, rec_len);
                 }
             }
@@ -88,4 +102,16 @@ int main(){
     }
 
     return 0;
+}
+
+int getState(char *state) {
+    int len = strlen(state);
+    if (memcmp(state, "-dd", len) == 0)
+        return 1;
+    else if (memcmp(state, "-d", len) == 0)
+        return 0;
+    else {
+        std::cout << "wrong input" << std::endl;
+        exit(-1);
+    }
 }
