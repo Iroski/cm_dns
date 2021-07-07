@@ -31,7 +31,7 @@ void functions::printDNSInformation(unsigned short ID, int find, std::string ip)
     }
 }
 
-void functions::forwardQuery(char *recvBuf, sockaddr_in receive_in, sockaddr_in server_in, SOCKET &externSoc, SOCKET localSoc, int len){
+void functions::forwardQuery(char *recvBuf, sockaddr_in receive_in, sockaddr_in server_in, SOCKET &externSoc, SOCKET localSoc, int len, int debugMode){
     unsigned short* recv_ID;
     unsigned short send_ID;
     recv_ID = (unsigned short*)malloc(sizeof(unsigned short*));
@@ -44,10 +44,8 @@ void functions::forwardQuery(char *recvBuf, sockaddr_in receive_in, sockaddr_in 
 
     DNS_HEADER *header = MessageDealer::getDNSHeader(recvBuf);
     DNS_QUERY *query = MessageDealer::getDNSQuery(recvBuf);
-    std::cout << send_len << std::endl;
-    MessageDealer::printQueryAll(query);
-    MessageDealer::printHeaderAll(header);
-    std::cout << "send end" << std::endl;
+    //std::cout << send_len << std::endl;
+    //std::cout << "send end" << std::endl;
 
     clock_t start, stop; //定时
     double duration = 0;
@@ -57,12 +55,16 @@ void functions::forwardQuery(char *recvBuf, sockaddr_in receive_in, sockaddr_in 
 
     if (recv_len != -1 && recv_len != 0) {
         char *tmp_ptr = recvBuf;
-        DNS_HEADER *header = MessageDealer::getDNSHeader(tmp_ptr);
-        DNS_QUERY *query = MessageDealer::getDNSQuery(tmp_ptr);
-        std::cout << recv_len << std::endl;
-        MessageDealer::printQueryAll(query);
-        MessageDealer::printHeaderAll(header);
-        std::cout << "receive end" << std::endl;
+        Message message = MessageDealer::messageInit(tmp_ptr, true);
+        DetailedLogDealer::externalInit();
+        MessageDealer::printDetailedInfo(message);
+//        if(message.getQuery()->type=="IPV6"){
+//            std::cout<<"Start IPV6 process"<<std::endl;
+//        }
+//        DNS_HEADER *header = MessageDealer::getDNSHeader(tmp_ptr);
+//        DNS_QUERY *query = MessageDealer::getDNSQuery(tmp_ptr);
+//        std::cout << recv_len << std::endl;
+//        std::cout << "receive end" << std::endl;
     }
 
     //ID转换
@@ -73,14 +75,13 @@ void functions::forwardQuery(char *recvBuf, sockaddr_in receive_in, sockaddr_in 
     send_len = sendto(localSoc, recvBuf, recv_len, 0, (SOCKADDR*)&client, sizeof(client));
     if (send_len != -1 && send_len != 0) {
         char *tmp_ptr = recvBuf;
-        DNS_HEADER *header = MessageDealer::getDNSHeader(tmp_ptr);
-        DNS_QUERY *query = MessageDealer::getDNSQuery(tmp_ptr);
-        std::cout << send_len << std::endl;
-        MessageDealer::printQueryAll(query);
-        MessageDealer::printHeaderAll(header);
-        std::cout << "send end" << std::endl;
+//       DNS_HEADER *header = MessageDealer::getDNSHeader(tmp_ptr);
+//        DNS_QUERY *query = MessageDealer::getDNSQuery(tmp_ptr);
+        //std::cout << send_len << std::endl;
+
+//        std::cout << "send to local end" << std::endl;
     }
-    free(recv_ID); //释放动态分配的内存
+//    free(recv_ID); //释放动态分配的内存
 }
 
 void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive_in, SOCKET localSoc, int rec_len) {
