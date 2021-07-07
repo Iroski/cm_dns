@@ -93,7 +93,7 @@ int main(int argc, char **argv) {
             DNS_QUERY *query = local_message.getQuery();
             if (query->type != "IPV4" && query->type != "IPV6") {// type not A & AAAA
                 if(query->type=="PTR"){
-                    functions::sendBackPTR(rece_buff,receive_in,localSoc);
+                    functions::sendBackPTR(rece_buff,rec_len,receive_in,localSoc);
                 }
             } else {
                 type = query->type;
