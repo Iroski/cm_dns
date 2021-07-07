@@ -169,7 +169,7 @@ void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive
     }else{
         Message message=MessageDealer::messageInit(send_buf,true);
         if(debug_mode)
-            DetailedLogDealer::receiveInternal(message,send_buf,sizeof(send_buf));
+            DetailedLogDealer::receiveInternal(message,send_buf,isSend);
     }
 
 }
@@ -292,6 +292,39 @@ EM_IP_TYPE functions::Check_IP_V4(std::vector<std::string> vecIpSection) {
     }
 
     return IP_V4;
+}
+
+void functions::sendBackPTR(char *rece_buff, sockaddr_in receive_in, SOCKET localSoc) {
+    char *tmp_ptr = rece_buff;
+    char send_buf[MAX_BUFFER_SIZE];
+    Message message=MessageDealer::messageInit(tmp_ptr,true);
+    MessageDealer::getDNSHeader(rece_buff);
+    DNS_QUERY *query=message.getQuery();
+    int len=query->headerAndQueryLength;
+    memcpy(send_buf, rece_buff, len);
+    char answer[16];
+    int length=0;
+    unsigned short Name = htons(0xc00c);
+    memcpy(answer, &Name, sizeof(unsigned short));
+    length += sizeof(unsigned short);
+    unsigned short TypeSOA = htons(0x0006);
+    memcpy(answer + length, &TypeSOA, sizeof(unsigned short));
+    length += sizeof(unsigned short);
+
+
+    unsigned short ClassA = htons(0x0001);
+    memcpy(answer + length, &ClassA, sizeof(unsigned short));
+    length += sizeof(unsigned short);
+
+    unsigned long timeLive = htonl(0x7b);
+    memcpy(answer + length, &timeLive, sizeof(unsigned long));
+    length += sizeof(unsigned long);
+
+    int isSend;
+    isSend = sendto(localSoc, send_buf, length, 0, (SOCKADDR*)&receive_in, sizeof(receive_in));
+    if (!isSend) {
+        printf("send failed");
+    }
 }
 
 
