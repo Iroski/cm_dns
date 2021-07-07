@@ -6,7 +6,7 @@
 
 
 
-void DetailedLogDealer::receiveLocal(int len, struct sockaddr_in receive_in,Message message) {
+void DetailedLogDealer::receiveLocal(int len, struct sockaddr_in receive_in, Message message) {
     std::cout<<"\n\n-----------------------------------NEW QUERY----------------------------------------"<<std::endl;
     readLocalAddr(len,receive_in);
     MessageDealer::printDetailedInfo(std::move(message));

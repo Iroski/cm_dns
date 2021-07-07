@@ -6,6 +6,8 @@
 #include "functions.h"
 #include "MessageDealer.h"
 #include "DNSStore.h"
+#include "SimpleLogDealer.h"
+
 extern std::string URL;
 extern IDTransform IDTransTable[ID_AMOUNT];
 
@@ -37,28 +39,24 @@ void functions::forwardQuery(char *recvBuf, sockaddr_in receive_in, sockaddr_in 
     recv_ID = (unsigned short*)malloc(sizeof(unsigned short*));
     memcpy(recv_ID, recvBuf, sizeof(unsigned short));    // 收到报文的ID（前2字节）
     send_ID = htons(MessageDealer::getNewID(ntohs(*recv_ID), receive_in, FALSE));
-    //PrintInfo(ntohs(send_ID), not_find);
     memcpy(recvBuf, &send_ID, sizeof(unsigned short));
     int send_len = sendto(externSoc, recvBuf, len, 0, (struct sockaddr *)&server_in, sizeof(server_in));
     free(recv_ID);
 
-    DNS_HEADER *header = MessageDealer::getDNSHeader(recvBuf);
-    DNS_QUERY *query = MessageDealer::getDNSQuery(recvBuf);
-    //std::cout << send_len << std::endl;
-    //std::cout << "send end" << std::endl;
-
-    clock_t start, stop; //定时
-    double duration = 0;
-    start = clock();
-    int size = sizeof(server_in);
+    //clock_t start, stop; //定时
+    //double duration = 0;
+    //start = clock();
     int recv_len = recvfrom(externSoc, recvBuf, MAX_BUFFER_SIZE, 0, nullptr, nullptr); //接受从远端发回的信息
 
     if (recv_len != -1 && recv_len != 0) {
         char *tmp_ptr = recvBuf;
         Message message = MessageDealer::messageInit(tmp_ptr, true);
-        DetailedLogDealer::receiveExternal(message);
-//        std::cout << recv_len << std::endl;
-//        std::cout << "receive end" << std::endl;
+        if(debugMode == 1){
+            DetailedLogDealer::receiveExternal(message);
+        }
+       else if(debugMode == 0){
+            SimpleLogDealer::receiveExternal(message);
+       }
     }
 
     //ID转换
@@ -78,7 +76,7 @@ void functions::forwardQuery(char *recvBuf, sockaddr_in receive_in, sockaddr_in 
 //    free(recv_ID); //释放动态分配的内存
 }
 
-void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive_in, SOCKET localSoc, int rec_len,int debug_mode) {
+void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive_in, SOCKET localSoc, int rec_len, int debug_mode) {
     char send_buf[MAX_BUFFER_SIZE];
     unsigned short *pID=(unsigned short*)malloc(sizeof(unsigned short*));
     memcpy(pID, rece_buff, sizeof(unsigned short));
@@ -129,8 +127,13 @@ void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive
     if (!isSend) {
         printf("send failed");
     }else{
-        Message message=MessageDealer::messageInit(send_buf,true);
-        DetailedLogDealer::receiveInternal(message);
+        Message message = MessageDealer::messageInit(send_buf,true);
+        if(debug_mode){
+            DetailedLogDealer::receiveInternal(message);
+        }
+        else{
+            SimpleLogDealer::receiveInternal(message);
+        }
     }
 
 }

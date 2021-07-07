@@ -12,6 +12,7 @@
 #include "DNSStore.h"
 #include "functions.h"
 #include "DetailedLogDealer.h"
+#include "SimpleLogDealer.h"
 
 std::string URL;  //域名
 int ID_COUNT;
@@ -28,7 +29,8 @@ int main(int argc, char **argv) {
         server_ip = argv[2];
     if (argc >= 3)
         file_path = argv[3];
-    int debug_mode=getState(mode);
+    int debug_mode = getState(mode);
+    std::cout << "debug_mode:" << mode << " " << debug_mode << std::endl;
     //WSA init
     WORD sockVersion = MAKEWORD(2, 2);
     WSADATA wsaData;
@@ -82,6 +84,8 @@ int main(int argc, char **argv) {
             Message local_message=MessageDealer::messageInit(tmp_ptr,false);
             if(debug_mode)
                 DetailedLogDealer::receiveLocal(rec_len,receive_in,local_message);
+            else
+                SimpleLogDealer::receiveLocal(rec_len,receive_in,local_message);
 
             DNS_QUERY *query = local_message.getQuery();
             if (query->type != "IPV4" && query->type != "IPV6") {// type not A & AAAA
@@ -90,11 +94,11 @@ int main(int argc, char **argv) {
                 URL = MessageDealer::getHostName(tmp_ptr + 12, tmp_ptr); // 读取域名
                 std::string ip = store.getStoredIpByDomain(URL);   //查看是否在本地表中
                 if (ip.empty()) {
-                    functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len,debug_mode);
+                    functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len, debug_mode);
                 } else if (ip == "nigeiwoligiaogiao") {
                     break; // ********************************
                 } else {
-                    functions::sendingBack(rece_buff, ip, receive_in, localSoc, rec_len,debug_mode);
+                    functions::sendingBack(rece_buff, ip, receive_in, localSoc, rec_len, debug_mode);
                 }
             }
         }
@@ -105,10 +109,10 @@ int main(int argc, char **argv) {
 
 int getState(char *state) {
     int len = strlen(state);
-    if (memcmp(state, "-dd", len) == 0)
-        return 1;
-    else if (memcmp(state, "-d", len) == 0)
+    if (memcmp(state, "-d", len) == 0)
         return 0;
+    else if (memcmp(state, "-dd", len) == 0)
+        return 1;
     else {
         std::cout << "wrong input" << std::endl;
         exit(-1);
