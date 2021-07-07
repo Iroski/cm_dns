@@ -71,34 +71,34 @@ int main(int argc, char **argv) {
 
     char rece_buff[MAX_BUFFER_SIZE];
     while (1) {
+//        std::cout<<"new round"<<std::endl;
         int len_rece = sizeof(receive_in);
         memset(rece_buff, 0, MAX_BUFFER_SIZE); //将接收缓存先置为全0
 
         int rec_len;
         rec_len = recvfrom(localSoc, rece_buff, sizeof(rece_buff), 0, (struct sockaddr *) &receive_in, &len_rece); //收到local
+        if(rec_len!=-1&&rec_len!=0){
+            char *tmp_ptr = rece_buff;
+            Message local_message=MessageDealer::messageInit(tmp_ptr,false);
+            DetailedLogDealer::receiveLocalInit();
+            DetailedLogDealer::readLocalAddr(rec_len,receive_in);
+            MessageDealer::printDetailedInfo(local_message);
+            DNS_QUERY *query = local_message.getQuery();
 
+            if (query->type != "IPV4" && query->type != "IPV6") {// type not A & AAAA
 
-        char *tmp_ptr = rece_buff;
-        Message local_message=MessageDealer::messageInit(tmp_ptr,false);
-        DetailedLogDealer::receiveLocalInit();
-        DetailedLogDealer::readLocalAddr(rec_len,receive_in);
-        MessageDealer::printDetailedInfo(local_message);
-        DNS_QUERY *query = local_message.getQuery();
-
-        if (query->type != "IPV4" && query->type != "IPV6") {// type not A & AAAA
-
-        } else {
-            URL = MessageDealer::getHostName(tmp_ptr + 12, tmp_ptr); // 读取域名
-            std::string ip = store.getStoredIpByDomain(URL);   //查看是否在本地表中
-            if (ip == "") {
-                functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len,debug_mode);
-            } else if (ip == "nigeiwoligiaogiao") {
-                break; // ********************************
             } else {
-                functions::sendingBack(rece_buff, ip, receive_in, localSoc, rec_len);
+                URL = MessageDealer::getHostName(tmp_ptr + 12, tmp_ptr); // 读取域名
+                std::string ip = store.getStoredIpByDomain(URL);   //查看是否在本地表中
+                if (ip.empty()) {
+                    functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len,debug_mode);
+                } else if (ip == "nigeiwoligiaogiao") {
+                    break; // ********************************
+                } else {
+                    functions::sendingBack(rece_buff, ip, receive_in, localSoc, rec_len);
+                }
             }
         }
-
     }
 
     return 0;

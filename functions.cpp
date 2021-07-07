@@ -58,6 +58,9 @@ void functions::forwardQuery(char *recvBuf, sockaddr_in receive_in, sockaddr_in 
         Message message = MessageDealer::messageInit(tmp_ptr, true);
         DetailedLogDealer::externalInit();
         MessageDealer::printDetailedInfo(message);
+//        if(message.getQuery()->type=="IPV6"){
+//            std::cout<<"Start IPV6 process"<<std::endl;
+//        }
 //        DNS_HEADER *header = MessageDealer::getDNSHeader(tmp_ptr);
 //        DNS_QUERY *query = MessageDealer::getDNSQuery(tmp_ptr);
 //        std::cout << recv_len << std::endl;
@@ -72,13 +75,13 @@ void functions::forwardQuery(char *recvBuf, sockaddr_in receive_in, sockaddr_in 
     send_len = sendto(localSoc, recvBuf, recv_len, 0, (SOCKADDR*)&client, sizeof(client));
     if (send_len != -1 && send_len != 0) {
         char *tmp_ptr = recvBuf;
-        DNS_HEADER *header = MessageDealer::getDNSHeader(tmp_ptr);
-        DNS_QUERY *query = MessageDealer::getDNSQuery(tmp_ptr);
+//       DNS_HEADER *header = MessageDealer::getDNSHeader(tmp_ptr);
+//        DNS_QUERY *query = MessageDealer::getDNSQuery(tmp_ptr);
         //std::cout << send_len << std::endl;
 
-        //std::cout << "send end" << std::endl;
+//        std::cout << "send to local end" << std::endl;
     }
-    free(recv_ID); //释放动态分配的内存
+//    free(recv_ID); //释放动态分配的内存
 }
 
 void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive_in, SOCKET localSoc, int rec_len) {
