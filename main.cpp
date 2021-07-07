@@ -89,6 +89,7 @@ int main(int argc, char **argv) {
                     char *tmp_ptr = rece_buff;
                     Message message=MessageDealer::messageInit(tmp_ptr,true);
                     MessageDealer::getDNSHeader(rece_buff);
+                    DNS_QUERY *query=message.getQuery();
                 }
             } else {
                 type=query->type;
@@ -102,10 +103,11 @@ int main(int argc, char **argv) {
                 } else if (ip == "nigeiwoligiaogiao") {
                     break; // ********************************
                 } else {
-                    if ((ipType==IP_V4&&type=="IPV6")||(ipType==IP_V6&&type=="IPV4")) {
+                    if ((function.Get_Type_Name(ipType)!=type)) {
                         functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len,debug_mode);
                     }
-                    functions::sendingBack(rece_buff, ip, receive_in, localSoc, rec_len,type);
+                    else
+                        functions::sendingBack(rece_buff, ip, receive_in, localSoc, rec_len,type);
                 }
             }
         }
