@@ -87,9 +87,57 @@ int main(int argc, char **argv) {
             if (query->type != "IPV4" && query->type != "IPV6") {// type not A & AAAA
                 if(query->type=="PTR"){
                     char *tmp_ptr = rece_buff;
+                    char send_buf[MAX_BUFFER_SIZE];
                     Message message=MessageDealer::messageInit(tmp_ptr,true);
                     MessageDealer::getDNSHeader(rece_buff);
                     DNS_QUERY *query=message.getQuery();
+                    int len=query->headerAndQueryLength;
+                    memcpy(send_buf, rece_buff, len);
+                    char answer[16];
+                    int length=0;
+                    unsigned short Name = htons(0xc00c);
+                    memcpy(answer, &Name, sizeof(unsigned short));
+                    length += sizeof(unsigned short);
+                    unsigned short TypeSOA = htons(0x0006);
+                    memcpy(answer + length, &TypeSOA, sizeof(unsigned short));
+                    length += sizeof(unsigned short);
+
+
+                    unsigned short ClassA = htons(0x0001);
+                    memcpy(answer + length, &ClassA, sizeof(unsigned short));
+                    length += sizeof(unsigned short);
+
+                    unsigned long timeLive = htonl(0x7b);
+                    memcpy(answer + length, &timeLive, sizeof(unsigned long));
+                    length += sizeof(unsigned long);
+//                    unsigned short ResourceDataLength;
+//                    if (type == "IPV4") {
+//                        ResourceDataLength = htons(0x0004);
+//                    } else if (type=="IPV6"){
+//                        ResourceDataLength = htons(0x0010);
+//                    } else {
+//                        ResourceDataLength = htons(0x0004);
+//                    }
+//                    memcpy(answer + length, &ResourceDataLength, sizeof(unsigned short));
+//                    length += sizeof(unsigned short);
+//                    char *Ip = const_cast<char *>(ip.c_str());
+//                    auto IP = inet_addr(Ip);
+//                    if (type == "IPV4") {
+//                        memcpy(answer + length, &IP, sizeof(unsigned long));
+//                    } else if (type=="IPV6"){
+//                        memcpy(answer + length, &IP, sizeof(IP));
+//                    } else {
+//                        memcpy(answer + length, &IP, sizeof(unsigned long));
+//                    }
+//                    length += sizeof(unsigned long);
+//                    length +=  rec_len;
+//                    memcpy(send_buf +  rec_len, answer, length);
+
+                    int isSend;
+                    isSend = sendto(localSoc, send_buf, length, 0, (SOCKADDR*)&receive_in, sizeof(receive_in));
+                    if (!isSend) {
+                        printf("send failed");
+                    }
                 }
             } else {
                 type=query->type;
