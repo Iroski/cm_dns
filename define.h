@@ -11,7 +11,6 @@
 #define SERVER_DNS_ADDR "10.3.9.44"
 #define TABLE_SIZE 200
 #define ID_AMOUNT 2000
-#define PATH "dnsrelay.txt"
 
 #include <winsock2.h>
 #include <windows.h>
