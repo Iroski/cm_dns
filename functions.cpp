@@ -20,28 +20,6 @@ extern IDTransform IDTransTable[ID_AMOUNT];
 
 using namespace std;
 
-void functions::printDNSInformation(unsigned short ID, int find, std::string ip) {
-    printf("%d",ID);
-    if (find == 0) {
-        printf("    RELAY");
-        printf("    ");
-        std::cout<< URL<<"    "<<ip <<std::endl;
-    }
-    else {
-        if (ip=="0.0.0.0") {
-            printf("    SHIELD");
-            printf("   ");
-            std::cout<< URL<<"    "<<ip <<std::endl;;
-        }
-        else {
-            printf("    LOCAL");
-            printf("    ");
-            std::cout<< URL<<"    "<<ip <<std::endl;
-        }
-
-    }
-}
-
 void functions::forwardQuery(char *recvBuf, sockaddr_in receive_in, sockaddr_in server_in, SOCKET &externSoc, SOCKET localSoc, int len, int debugMode){
     unsigned short* recv_ID;
     unsigned short send_ID;
@@ -52,10 +30,10 @@ void functions::forwardQuery(char *recvBuf, sockaddr_in receive_in, sockaddr_in 
     int send_len = sendto(externSoc, recvBuf, len, 0, (struct sockaddr *)&server_in, sizeof(server_in));
     free(recv_ID);
 
-    //clock_t start, stop; //定时
-    //double duration = 0;
-    //start = clock();
     int recv_len = recvfrom(externSoc, recvBuf, MAX_BUFFER_SIZE, 0, nullptr, nullptr); //接受从远端发回的信息
+    if(recv_len == -1){
+        std::cout << "Receive Timeout" << std::endl;
+    }
 
     if (recv_len != -1 && recv_len != 0) {
         char *tmp_ptr = recvBuf;
@@ -74,15 +52,12 @@ void functions::forwardQuery(char *recvBuf, sockaddr_in receive_in, sockaddr_in 
     memcpy(recvBuf, &oID, sizeof(unsigned short));
     sockaddr_in client = IDTransTable[ntohs(*recv_ID)].client;
     send_len = sendto(localSoc, recvBuf, recv_len, 0, (SOCKADDR*)&client, sizeof(client));
-    if (send_len != -1 && send_len != 0) {
-        char *tmp_ptr = recvBuf;
-//       DNS_HEADER *header = MessageDealer::getDNSHeader(tmp_ptr);
-//        DNS_QUERY *query = MessageDealer::getDNSQuery(tmp_ptr);
-        //std::cout << send_len << std::endl;
-
-//        std::cout << "send to local end" << std::endl;
+    if(recv_len == -1){
+        std::cout << "Send Timeout" << std::endl;
     }
-//    free(recv_ID); //释放动态分配的内存
+    if (send_len != -1 && send_len != 0) {
+
+    }
 }
 
 void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive_in, SOCKET localSoc, int rec_len,std::string type,int debug_mode) {
@@ -100,15 +75,16 @@ void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive
     unsigned short nID = htons(MessageDealer::getNewID(ntohs(*pID), receive_in, FALSE));;//***********************
     //functions::printDNSInformation(nID, 1, ip);
     unsigned short AFlag;
-    if (ip == "0.0.0.0") {
+    if (ip == "0.0.0.0"||ip == "0:0:0:0:0:0:0:0") {
         unsigned short AFlag = htons(0x8183); //1000 0001 1000 0011
         memcpy(&send_buf[2], &AFlag, sizeof(unsigned short));
     } else {
         unsigned short AFlag = htons(0x8180); //1000 0001 1000 0000
         memcpy(&send_buf[2], &AFlag, sizeof(unsigned short));
     }
+
     unsigned short ansCount;
-    if (ip == "0.0.0.0") {
+    if (ip == "0.0.0.0"||ip == "0:0:0:0:0:0:0:0") {
         ansCount = htons(0x0000);
         //printf("**********  No such name!  **********\n");
     } else {
