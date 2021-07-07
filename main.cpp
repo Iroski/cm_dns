@@ -10,6 +10,7 @@
 #include "DNSStore.h"
 #include "functions.h"
 #include "DetailedLogDealer.h"
+#include "SimpleLogDealer.h"
 
 std::string URL;  //域名
 int ID_COUNT;
@@ -26,7 +27,8 @@ int main(int argc, char **argv) {
         server_ip = argv[2];
     if (argc >= 3)
         file_path = argv[3];
-    int debug_mode=getState(mode);
+    int debug_mode = getState(mode);
+    std::cout << "debug_mode:" << mode << std::endl;
     //WSA init
     WORD sockVersion = MAKEWORD(2, 2);
     WSADATA wsaData;
@@ -82,12 +84,13 @@ int main(int argc, char **argv) {
         if (rec_len != -1 && rec_len != 0) {
             std::string type;
             char *tmp_ptr = rece_buff;
-            Message local_message = MessageDealer::messageInit(tmp_ptr, false);
-            if (debug_mode)
+            Message local_message=MessageDealer::messageInit(tmp_ptr,false);
+            if(debug_mode)
                 DetailedLogDealer::receiveLocal(rec_len, receive_in, local_message, server_ip, PORT,tmp_ptr,rec_len);
+            else
+                SimpleLogDealer::receiveLocal(rec_len,receive_in,local_message);
 
             DNS_QUERY *query = local_message.getQuery();
-
             if (query->type != "IPV4" && query->type != "IPV6") {// type not A & AAAA
                 if(query->type=="PTR"){
                     functions::sendBackPTR(rece_buff,receive_in,localSoc);
@@ -105,10 +108,10 @@ int main(int argc, char **argv) {
                     break; // ********************************
                 } else {
                     if ((function.Get_Type_Name(ipType)!=type)) {
-                        functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len,debug_mode);
+                        functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len, debug_mode);
                     }
                     else
-                        functions::sendingBack(rece_buff, ip, receive_in, localSoc, rec_len,type,debug_mode);
+                        functions::sendingBack(rece_buff, ip, receive_in, localSoc, rec_len,type, debug_mode);
                 }
             }
         }
@@ -119,10 +122,10 @@ int main(int argc, char **argv) {
 
 int getState(char *state) {
     int len = strlen(state);
-    if (memcmp(state, "-dd", len) == 0)
-        return 1;
-    else if (memcmp(state, "-d", len) == 0)
+    if (memcmp(state, "-d", len) == 0)
         return 0;
+    else if (memcmp(state, "-dd", len) == 0)
+        return 1;
     else {
         std::cout << "wrong input" << std::endl;
         exit(-1);

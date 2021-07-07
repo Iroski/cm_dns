@@ -22,7 +22,9 @@ class MessageDealer {
         static std::string getHostName(char* buff, char *domain_start_ptr);
         static void printHeaderDetailed(DNS_HEADER* header);
         static void printQueryDetailed(DNS_QUERY* query);
+        static void printQuerySimple(DNS_QUERY* query);
         static void printResponsesDetailed(const std::vector<DNS_RESPONSE>& responses);
+        static void printResponsesSimple(const std::vector<DNS_RESPONSE>& responses);
         static void printDetailedInfo(Message message);
         static char* ipv4ToChar(const std::string& str);
         static char* ipv6ToChar(const std::string& str);
