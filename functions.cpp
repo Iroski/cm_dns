@@ -88,7 +88,7 @@ void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive
     unsigned short *pID=(unsigned short*)malloc(sizeof(unsigned short*));
     memcpy(pID, rece_buff, sizeof(unsigned short));
     memcpy(send_buf,rece_buff,rec_len);
-    unsigned short nID=htons(MessageDealer::getNewID(ntohs(*pID), receive_in, FALSE));;//***********************
+    unsigned short nID=htons(MessageDealer::getNewID(ntohs(*pID), receive_in, FALSE));
     unsigned short AFlag=htons(0x8180);
     memcpy(&send_buf[2], &AFlag, sizeof(unsigned short));
     functions::printDNSInformation(nID,1,ip);
