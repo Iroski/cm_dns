@@ -71,10 +71,19 @@ int main(int argc, char **argv) {
         if (debug_mode)
             std::cout << "bind local socket to server, port:" << EXTERN_PORT << std::endl;
     }
+    struct timeval tv_out; // 设置超时
+    tv_out.tv_sec = 0;
+    tv_out.tv_usec = 300000;
+    if (setsockopt(externSoc, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv_out, sizeof(tv_out)) == -1) {
+        std::cout <<  "External Socket setsockopt failed:" << std::endl;
+    }
+    if (setsockopt(localSoc, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv_out, sizeof(tv_out)) == -1) {
+        std::cout <<  "Local Socket setsockopt failed:" << std::endl;
+    }
+
 
     char rece_buff[MAX_BUFFER_SIZE];
     while (1) {
-//        std::cout<<"new round"<<std::endl;
         int len_rece = sizeof(receive_in);
         memset(rece_buff, 0, MAX_BUFFER_SIZE); //将接收缓存先置为全0
 
@@ -93,7 +102,7 @@ int main(int argc, char **argv) {
             DNS_QUERY *query = local_message.getQuery();
             if (query->type != "IPV4" && query->type != "IPV6") {// type not A & AAAA
                 if(query->type=="PTR"){
-                    functions::sendBackPTR(rece_buff,receive_in,localSoc);
+                    functions::sendBackPTR(rece_buff,rec_len,receive_in,localSoc);
                 }
             } else {
                 type = query->type;
@@ -110,8 +119,9 @@ int main(int argc, char **argv) {
                     if ((function.Get_Type_Name(ipType)!=type)) {
                         functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len, debug_mode);
                     }
-                    else
-                        functions::sendingBack(rece_buff, ip, receive_in, localSoc, rec_len,type, debug_mode);
+                    else {
+                        functions::sendingBack(rece_buff, ip, receive_in, localSoc, rec_len, type, debug_mode);
+                    }
                 }
             }
         }

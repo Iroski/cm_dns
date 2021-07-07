@@ -39,7 +39,7 @@ void DNSStore::initLocalTable(const std::string Path) {
             break;
         }
     }
-    for (int j=0;j<2;j++) {
+    for (int j=0;j<DNSStoreNum;j++) {
         std::vector<std::string> res;
         std::string result;
         std::stringstream input(Temp[j]);
