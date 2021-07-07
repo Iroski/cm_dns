@@ -75,6 +75,8 @@ DNS_QUERY *MessageDealer::getDNSQuery(char *buff) {
         query->type="IPV4";
     else if(type==28)
         query->type="IPV6";
+    else if(type==12)
+        query->type="PTR";
     else
         query->type=std::to_string(type);
     query->class_ = class_;
@@ -196,7 +198,7 @@ void MessageDealer::printResponsesDetailed(const std::vector<DNS_RESPONSE>& resp
     int count=1;
 
     for(const auto & response : responses){
-        std::cout<<"Header: "<<"count: "<<count<<" name:"<<response.name<<" type:"<<response.type
+        std::cout<<"Response: "<<"count: "<<count<<" name:"<<response.name<<" type:"<<response.type
                      <<" class:"<<response.class_<<" ttl:"<<response.ttl<<" dataLength:"<<response.data_length<<" data:"<<response.data<<std::endl;
         ++count;
     }
@@ -208,7 +210,7 @@ void MessageDealer::printQueryDetailed(DNS_QUERY *query) {
 }
 
 void MessageDealer::printHeaderDetailed(DNS_HEADER *header) {
-    std::cout <<"Response: "<< "id: " << header->id << " flag: " << header->flags << " question: " << header->question << " answer:"
+    std::cout <<"Header: "<< "id: " << header->id << " flag: " << header->flags << " question: " << header->question << " answer:"
               << header->answer_RR << " authority:"
               << header->authority_RR << " additional:" << header->additional_RR << std::endl;
 }
