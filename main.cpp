@@ -4,9 +4,7 @@
 #include <windows.h>
 #include <process.h>
 #include <cstring>
-
 #pragma comment(lib, "ws2_32.lib") //加载 ws2_32.dll
-
 #include "MessageDealer.h"
 #include "define.h"
 #include "DNSStore.h"
@@ -17,7 +15,6 @@ std::string URL;  //域名
 int ID_COUNT;
 IDTransform IDTransTable[ID_AMOUNT];    //ID转换表
 int getState(char *state);
-
 int main(int argc, char **argv) {
 
     char *mode = "-dd";
@@ -29,7 +26,7 @@ int main(int argc, char **argv) {
         server_ip = argv[2];
     if (argc >= 3)
         file_path = argv[3];
-    int debug_mode = getState(mode);
+    int debug_mode=getState(mode);
     //WSA init
     WORD sockVersion = MAKEWORD(2, 2);
     WSADATA wsaData;
@@ -86,7 +83,7 @@ int main(int argc, char **argv) {
             char *tmp_ptr = rece_buff;
             Message local_message = MessageDealer::messageInit(tmp_ptr, false);
             if (debug_mode)
-                DetailedLogDealer::receiveLocal(rec_len, receive_in, local_message, server_ip, PORT);
+                DetailedLogDealer::receiveLocal(rec_len, receive_in, local_message, server_ip, PORT,tmp_ptr,rec_len);
 
             DNS_QUERY *query = local_message.getQuery();
 
@@ -95,6 +92,7 @@ int main(int argc, char **argv) {
                     tmp_ptr = rece_buff;
                     Message message = MessageDealer::messageInit(tmp_ptr, true);
                     MessageDealer::getDNSHeader(rece_buff);
+                    DNS_QUERY *query=message.getQuery();
                 }
             } else {
                 type = query->type;
@@ -108,11 +106,11 @@ int main(int argc, char **argv) {
                 } else if (ip == "nigeiwoligiaogiao") {
                     break; // ********************************
                 } else {
-                    if ((ipType == IP_V4 && type == "IPV6") || (ipType == IP_V6 && type == "IPV4")) {
-                        functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len,
-                                                debug_mode);
-                    } else
-                        functions::sendingBack(rece_buff, ip, receive_in, localSoc, rec_len, type, debug_mode);
+                    if ((function.Get_Type_Name(ipType)!=type)) {
+                        functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len,debug_mode);
+                    }
+                    else
+                        functions::sendingBack(rece_buff, ip, receive_in, localSoc, rec_len,type,debug_mode);
                 }
             }
         }

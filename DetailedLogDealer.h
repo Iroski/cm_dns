@@ -14,9 +14,9 @@
 #include <ctime>
 class DetailedLogDealer {
 public:
-     static void receiveLocal(int len, struct sockaddr_in receive_in,Message message,std::string server_ip,int server_port);
-    static void receiveInternal(const Message& message);
-    static void receiveExternal(Message message);
+     static void receiveLocal(int len, struct sockaddr_in receive_in,Message message,const std::string& server_ip,int server_port,char* ptr,int ptr_len);
+    static void receiveInternal(const Message& message,char* ptr,int ptr_len);
+    static void receiveExternal(Message message,char* ptr,int ptr_len);
      static void readLocalAddr(int len, struct sockaddr_in receive_in,const std::string& server_ip, int server_port);
 };
 
