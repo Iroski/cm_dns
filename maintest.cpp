@@ -82,7 +82,6 @@ int main(int argc, char **argv) {
         rec_len = recvfrom(localSoc, rece_buff, sizeof(rece_buff), 0, (struct sockaddr *) &receive_in, &len_rece);
         char *tmp_ptr = rece_buff;
         Message local_message=MessageDealer::messageInit(tmp_ptr,false);
-        DetailedLogDealer::receiveLocalInit();
         DetailedLogDealer::readLocalAddr(rec_len,receive_in);
         MessageDealer::printDetailedInfo(local_message);
         unsigned short send_len;

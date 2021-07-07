@@ -11,10 +11,10 @@ DNS_HEADER *MessageDealer::getDNSHeader(char *buff) {
     char *tmp_ptr = buff;
     u_short t_id = ntohs(*(u_short *) tmp_ptr);
     tmp_ptr += sizeof(t_id);
-    u_short question = ntohs(*(u_short *) tmp_ptr);
-    tmp_ptr += sizeof(question);
     u_short flags = ntohs(*(u_short *) tmp_ptr);
     tmp_ptr += sizeof(flags);
+    u_short question = ntohs(*(u_short *) tmp_ptr);
+    tmp_ptr += sizeof(question);
     u_short answer_rr = ntohs(*(u_short *) tmp_ptr);
     tmp_ptr += sizeof(flags);
     u_short authority_rr = ntohs(*(u_short *) tmp_ptr);
@@ -54,7 +54,8 @@ std::string MessageDealer::getHostName(char *buff, char *domain_start_ptr) {
         domain_str.append(".");
         domain_str.append(MessageDealer::getHostName(data_start_str,domain_start_ptr));
     }
-    domain_str.erase(0, domain_str.find_first_not_of(" ")).erase(domain_str.find_last_not_of(" ") + 1);
+    domain_str.erase(0, domain_str.find_first_not_of(" ")).erase(domain_str.find_last_not_of(" ") + 1)
+    .erase(0, domain_str.find_first_not_of(".")).erase(domain_str.find_last_not_of(".") + 1);
     return domain_str;
 }
 
@@ -198,7 +199,7 @@ void MessageDealer::printResponsesDetailed(const std::vector<DNS_RESPONSE>& resp
     int count=1;
 
     for(const auto & response : responses){
-        std::cout<<"Header: "<<"count: "<<count<<" name:"<<response.name<<" type:"<<response.type
+        std::cout<<"Response: "<<"count: "<<count<<" name:"<<response.name<<" type:"<<response.type
                      <<" class:"<<response.class_<<" ttl:"<<response.ttl<<" dataLength:"<<response.data_length<<" data:"<<response.data<<std::endl;
         ++count;
     }
@@ -210,7 +211,7 @@ void MessageDealer::printQueryDetailed(DNS_QUERY *query) {
 }
 
 void MessageDealer::printHeaderDetailed(DNS_HEADER *header) {
-    std::cout <<"Response: "<< "id: " << header->id << " flag: " << header->flags << " question: " << header->question << " answer:"
+    std::cout <<"Header: "<< "id: " << header->id << " flag: " << header->flags << " question: " << header->question << " answer:"
               << header->answer_RR << " authority:"
               << header->authority_RR << " additional:" << header->additional_RR << std::endl;
 }
@@ -219,6 +220,11 @@ void MessageDealer::printDetailedInfo(Message message) {
     MessageDealer::printHeaderDetailed(message.getHeader());
     MessageDealer::printQueryDetailed(message.getQuery());
     MessageDealer::printResponsesDetailed(message.getResponses());
+}
+
+bool MessageDealer::isIntercept(Message message) {
+    int flag=message.getHeader()->flags;
+    return flag%16==3;
 }
 
 

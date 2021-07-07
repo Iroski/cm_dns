@@ -19,7 +19,7 @@ std::string DNSStore::getStoredIpByDomain(std::string domain) {
 void DNSStore::initLocalTable(const std::string Path) {
     int i=0;
     std::ifstream myfile;
-    std::cout << Path << std::endl;
+    std::cout << "Load from:"<<Path << std::endl;
     myfile.open(Path, std::ios::in);
     std::string Temp[TABLE_SIZE];
     std::string temp;
@@ -47,9 +47,9 @@ void DNSStore::initLocalTable(const std::string Path) {
             res.push_back(result);
         store_map[res[1]] = res[0];
     }
-    for (auto &iter : store_map) {
-        std::cout << iter.first << " " << iter.second << std::endl;
-    }
+//    for (auto &iter : store_map) {
+//        std::cout << iter.first << " " << iter.second << std::endl;
+//    }
     printf("Load records success.\n");
 }
 
