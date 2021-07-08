@@ -29,13 +29,11 @@ int main(int argc, char **argv) {
         file_path = argv[3];
     int debug_mode=getState(mode);
 
-//    char* str="24098c006c21103d000000ffb00239ab";
-//    char tmp_str[40];//=new char;
-//   std::cout<<MessageDealer::charToIpv6(str)<<std::endl;
-//    char result_char [1024];
-//    inet_ntop(AF_INET6,str,result_char,1024);
-//    std::cout<<result_char<<std::endl;
-//    exit(1);
+    std::string str="2001:da8:215:4078:250:56ff:fe97:654d";
+    char tmp_str[1024];//=new char;
+   auto result=MessageDealer::ipv6ToChar(str);
+   DetailedLogDealer::printBinaryInfo(result, strlen(result));
+    exit(1);
     //WSA init
     WORD sockVersion = MAKEWORD(2, 2);
     WSADATA wsaData;
@@ -82,7 +80,7 @@ int main(int argc, char **argv) {
         rec_len = recvfrom(localSoc, rece_buff, sizeof(rece_buff), 0, (struct sockaddr *) &receive_in, &len_rece);
         char *tmp_ptr = rece_buff;
         Message local_message=MessageDealer::messageInit(tmp_ptr,false);
-        DetailedLogDealer::readLocalAddr(rec_len,receive_in);
+//        DetailedLogDealer::readLocalAddr(rec_len,receive_in);
         MessageDealer::printDetailedInfo(local_message);
         unsigned short send_len;
 
