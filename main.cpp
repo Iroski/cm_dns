@@ -95,14 +95,14 @@ int main(int argc, char **argv) {
             char *tmp_ptr = rece_buff;
             Message local_message=MessageDealer::messageInit(tmp_ptr,false);
             if(debug_mode)
-                DetailedLogDealer::receiveLocal(rec_len, receive_in, local_message, server_ip, PORT,tmp_ptr,rec_len);
+                DetailedLogDealer::receiveLocal(rec_len, receive_in, local_message, server_ip, PORT, tmp_ptr, rec_len);
             else
                 SimpleLogDealer::receiveLocal(rec_len,receive_in,local_message);
 
             DNS_QUERY *query = local_message.getQuery();
             if (query->type != "IPV4" && query->type != "IPV6") {// type not A & AAAA
                 if(query->type=="PTR"){
-                    functions::sendBackPTR(rece_buff,rec_len,receive_in,localSoc);
+                    functions::sendBackPTR(rece_buff, rec_len, receive_in, localSoc, debug_mode);
                 }else
                     functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len, debug_mode);
 
