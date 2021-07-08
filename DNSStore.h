@@ -4,9 +4,11 @@
 
 #ifndef CM_DNS_CPP_DNSSTORE_H
 #define CM_DNS_CPP_DNSSTORE_H
+
 #include "define.h"
 #include <string>
 #include <unordered_map>
+
 extern int DNSStoreNum;
 
 class DNSStore {
@@ -17,9 +19,11 @@ private:
 public:
 
     void initLocalTable(const std::string Path);
+
 //    int checkDomainExist(std::string domain);
-    std::string getStoredIpByDomain(const std::string& domain);
-    std::string getStoredIp6ByDomain(const std::string& domain);
+    std::string getStoredIpByDomain(const std::string &domain);
+
+    std::string getStoredIp6ByDomain(const std::string &domain);
 };
 
 

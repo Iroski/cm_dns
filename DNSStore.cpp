@@ -24,6 +24,7 @@ void DNSStore::initLocalTable(const std::string Path) {
     std::ifstream myfile;
     std::cout << "Load from:"<<Path << std::endl;
     myfile.open(Path, std::ios::in);
+
     std::string Temp[TABLE_SIZE];
     std::string temp;
     if (!myfile.is_open()) {
