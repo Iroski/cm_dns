@@ -25,13 +25,12 @@
 //} DNS_ENTRY;
 typedef struct IDChange//ID转换表结构
 {
-    unsigned short oldID;			//原有ID
-    BOOL done;						//标记是否完成解析
-    SOCKADDR_IN client;				//请求者套接字地址
-}IDTransform;
+    unsigned short oldID;            //原有ID
+    BOOL done;                        //标记是否完成解析
+    SOCKADDR_IN client;                //请求者套接字地址
+} IDTransform;
 
-enum EM_IP_TYPE
-{
+enum EM_IP_TYPE {
     IP_V4 = 0,
     IP_V6,
     IP_UNKNOW,

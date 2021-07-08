@@ -33,6 +33,7 @@ void functions::forwardQuery(char *recvBuf, sockaddr_in receive_in, sockaddr_in 
     if (recv_len != -1 && recv_len != 0) {
         char *tmp_ptr = recvBuf;
         Message message = MessageDealer::messageInit(tmp_ptr, true);
+
         if(debugMode){
             DetailedLogDealer::receiveExternal(message,tmp_ptr,recv_len);
         }
@@ -59,9 +60,11 @@ void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive
     //char send_buf[MAX_BUFFER_SIZE];
     char *tmp_ptr = rece_buff;
     char send_buf[MAX_BUFFER_SIZE];
+
     Message message=MessageDealer::messageInit(tmp_ptr,true);
     MessageDealer::getDNSHeader(rece_buff);
     DNS_QUERY *query=message.getQuery();
+
     int len=query->headerAndQueryLength;
     memcpy(send_buf, rece_buff, len);
     unsigned short *pID = (unsigned short *) malloc(sizeof(unsigned short *));
@@ -154,17 +157,20 @@ void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive
 void functions::sendBackPTR(char *rece_buff, int rec_len,sockaddr_in receive_in, SOCKET localSoc, int debug_mode) {
     char *tmp_ptr = rece_buff;
     char send_buf[MAX_BUFFER_SIZE];
+
     Message message=MessageDealer::messageInit(tmp_ptr,true);
     MessageDealer::getDNSHeader(rece_buff);
     DNS_QUERY *query=message.getQuery();
     int len=query->headerAndQueryLength;
     memcpy(send_buf, rece_buff, len);
+
     unsigned short AFlag = htons(0x8180); //1000 0001 1000 0000
     memcpy(&send_buf[2], &AFlag, sizeof(unsigned short));
     int length=len;
     unsigned short Name = htons(0xc00c);
     memcpy(send_buf+length, &Name, sizeof(unsigned short));
     length += sizeof(unsigned short);
+
     unsigned short TypeSOA = htons(0x0006);
     memcpy(send_buf+length, &TypeSOA, sizeof(unsigned short));
     length += sizeof(unsigned short);
@@ -177,6 +183,7 @@ void functions::sendBackPTR(char *rece_buff, int rec_len,sockaddr_in receive_in,
     unsigned long timeLive = htonl(0x7b);
     memcpy(send_buf+length, &timeLive, sizeof(unsigned long));
     length += sizeof(unsigned long);
+
     unsigned short ResourceDataLength;
     ResourceDataLength = htons(0x0000);
     memcpy(send_buf+length, &ResourceDataLength, sizeof(unsigned short));
