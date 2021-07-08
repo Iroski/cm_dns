@@ -55,7 +55,7 @@ void functions::forwardQuery(char *recvBuf, sockaddr_in receive_in, sockaddr_in 
     }
 }
 
-void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive_in, SOCKET localSoc, int rec_len,std::string type,int debug_mode) {
+void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive_in, SOCKET localSoc, int rec_len,std::string type, int debug_mode) {
     //char send_buf[MAX_BUFFER_SIZE];
     char *tmp_ptr = rece_buff;
     char send_buf[MAX_BUFFER_SIZE];
@@ -151,7 +151,7 @@ void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive
     }
 }
 
-void functions::sendBackPTR(char *rece_buff, int rec_len,sockaddr_in receive_in, SOCKET localSoc) {
+void functions::sendBackPTR(char *rece_buff, int rec_len,sockaddr_in receive_in, SOCKET localSoc, int debug_mode, char *server_ip) {
     char *tmp_ptr = rece_buff;
     char send_buf[MAX_BUFFER_SIZE];
     Message message=MessageDealer::messageInit(tmp_ptr,true);
@@ -189,6 +189,13 @@ void functions::sendBackPTR(char *rece_buff, int rec_len,sockaddr_in receive_in,
     isSend = sendto(localSoc, send_buf, length, 0, (SOCKADDR*)&receive_in, sizeof(receive_in));
     if (!isSend) {
         printf("send failed");
+    }
+    else{
+        Message message = MessageDealer::messageInit(send_buf,true);
+        if(debug_mode)
+            DetailedLogDealer::receiveLocal(rec_len, receive_in, message, server_ip, PORT,tmp_ptr,rec_len);
+        else
+            SimpleLogDealer::receiveLocal(rec_len,receive_in,message);
     }
 }
 
