@@ -42,12 +42,13 @@ void DetailedLogDealer::receiveInternal(const Message &message,char* ptr,int ptr
 }
 
 void DetailedLogDealer::printBinaryInfo(char *ptr, int ptr_len) {
-    int count = 0;
+    int count=0;
     for(int i=0;i<ptr_len;++i){
         printf("%02x ",(uint8_t) ptr[i]);
-        if(++count == 16){
-            count = 0;
+        ++count;
+        if(count==16){
             printf("\n");
+            count=0;
         }
     }
     std::cout<<std::endl;

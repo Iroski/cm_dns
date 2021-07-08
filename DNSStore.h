@@ -12,12 +12,14 @@ extern int DNSStoreNum;
 class DNSStore {
 private:
     std::unordered_map<std::string, std::string> store_map;
+    std::unordered_map<std::string, std::string> store_map6;
 
 public:
 
     void initLocalTable(const std::string Path);
 //    int checkDomainExist(std::string domain);
-    std::string getStoredIpByDomain(std::string domain);
+    std::string getStoredIpByDomain(const std::string& domain);
+    std::string getStoredIp6ByDomain(const std::string& domain);
 };
 
 

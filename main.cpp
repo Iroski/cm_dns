@@ -94,36 +94,43 @@ int main(int argc, char **argv) {
             std::string type;
             char *tmp_ptr = rece_buff;
             Message local_message=MessageDealer::messageInit(tmp_ptr,false);
-            /*if(debug_mode)
-                DetailedLogDealer::receiveLocal(rec_len, receive_in, local_message, server_ip, PORT,tmp_ptr,rec_len);
+            if(debug_mode)
+                DetailedLogDealer::receiveLocal(rec_len, receive_in, local_message, server_ip, PORT, tmp_ptr, rec_len);
             else
-                SimpleLogDealer::receiveLocal(rec_len,receive_in,local_message);*/
+                SimpleLogDealer::receiveLocal(rec_len,receive_in,local_message);
 
             DNS_QUERY *query = local_message.getQuery();
             if (query->type != "IPV4" && query->type != "IPV6") {// type not A & AAAA
                 if(query->type=="PTR"){
-                    functions::sendBackPTR(rece_buff,rec_len,receive_in,localSoc,debug_mode,server_ip);
+                    functions::sendBackPTR(rece_buff, rec_len, receive_in, localSoc, debug_mode);
                 }else
                     functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len, debug_mode);
 
             } else {
                 type = query->type;
                 URL = MessageDealer::getHostName(tmp_ptr + 12, tmp_ptr); // 读取域名
-                std::string ip = store.getStoredIpByDomain(URL);   //查看是否在本地表中
+                std::string ip;
+                if (type=="IPV4") {
+                    ip = store.getStoredIpByDomain(URL);   //查看是否在本地表中
+                } else {
+                    ip = store.getStoredIp6ByDomain(URL);   //查看是否在本地表中
+                }
                 EM_IP_TYPE ipType = IP_UNKNOW;
                 functions function;
                 ipType = function.Check_IP(ip);
                 if (ip.empty()) {
                     functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len, debug_mode);
-                } else if (ip == "nigeiwoligiaogiao") {
+                }
+                else if (ip == "nigeiwoligiaogiao") {
                     break; // ********************************
-                } else {
-                    if ((function.Get_Type_Name(ipType)!=type)) {
-                        functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len, debug_mode);
-                    }
-                    else {
+                }
+                else {
+//                    if ((function.Get_Type_Name(ipType)!=type)) {
+//                        functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len, debug_mode);
+//                    }
+//                    else {
                         functions::sendingBack(rece_buff, ip, receive_in, localSoc, rec_len, type, debug_mode);
-                    }
+//                    }
                 }
             }
         }
