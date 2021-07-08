@@ -20,12 +20,10 @@ void DetailedLogDealer::readLocalAddr(int len, struct sockaddr_in receive_in, co
     char s[40];
     time_t now = time(0);
     std::string dt = ctime(&now);
-    dt = dt.substr(4, 20);
     sprintf(s, "%ld", q);
     std::cout << "Received from local:" << MessageDealer::charToIpv4(s) << ":" << receive_in.sin_port << "  Send to:"
               << server_ip << ":" << server_port << " (" << len
               << " bytes)" << " Time:" << dt << std::endl;
-
 }
 
 void DetailedLogDealer::receiveExternal(Message message,char* ptr,int ptr_len) {
