@@ -38,14 +38,19 @@ void DetailedLogDealer::receiveInternal(const Message &message,char* ptr,int ptr
     std::cout << "----------INTERNAL RESPONSE---------" << std::endl;
     MessageDealer::printDetailedInfo(message);
     if (MessageDealer::isIntercept(message)) {
-        std::cout << "++++++++THIS QUERY IS BE INTERCEPTED++++++++" << std::endl;
+        std::cout << "++++++++THIS QUERY IS INTERCEPTED++++++++" << std::endl;
     }
     printBinaryInfo(ptr,ptr_len);
 }
 
 void DetailedLogDealer::printBinaryInfo(char *ptr, int ptr_len) {
+    int count = 0;
     for(int i=0;i<ptr_len;++i){
         printf("%02x ",(uint8_t) ptr[i]);
+        if(++count == 16){
+            count = 0;
+            printf("\n");
+        }
     }
     std::cout<<std::endl;
 }
