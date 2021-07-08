@@ -205,14 +205,14 @@ void MessageDealer::printResponsesDetailed(const std::vector<DNS_RESPONSE>& resp
 }
 
 void MessageDealer::printQueryDetailed(DNS_QUERY *query) {
-    std::cout <<"Query: "<<"domain name:"<< query->name << " type:" << query->type << " class:" << query->class_ << " length:"
+    std::cout <<"Query: "<<"domain name:"<< query->name << " type:" << query->type << " class:" << query->class_ << " H&Qlength:"
               << query->headerAndQueryLength << std::endl;
 }
 
 void MessageDealer::printHeaderDetailed(DNS_HEADER *header) {
-    std::cout <<"Header: "<< "id: " << header->id;
-    printf(" 0x%x",header->flags);
-    std::cout<< " question: " << header->question << " answer:"
+    std::cout <<"Header: "<< "id:" << header->id;
+    printf(" flag: 0x%x",header->flags);
+    std::cout<< " question:" << header->question << " answer:"
               << header->answer_RR << " authority:"
               << header->authority_RR << " additional:" << header->additional_RR << std::endl;
 }
