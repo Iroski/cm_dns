@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
     }
     struct timeval tv_out; // 设置超时
     tv_out.tv_sec = 0;
-    tv_out.tv_usec = 300000;
+    tv_out.tv_usec = 2000000;
     if (setsockopt(externSoc, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv_out, sizeof(tv_out)) == -1) {
         std::cout <<  "External Socket setsockopt failed:" << std::endl;
     }
@@ -103,7 +103,9 @@ int main(int argc, char **argv) {
             if (query->type != "IPV4" && query->type != "IPV6") {// type not A & AAAA
                 if(query->type=="PTR"){
                     functions::sendBackPTR(rece_buff,rec_len,receive_in,localSoc);
-                }
+                }else
+                    functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len, debug_mode);
+
             } else {
                 type = query->type;
                 URL = MessageDealer::getHostName(tmp_ptr + 12, tmp_ptr); // 读取域名

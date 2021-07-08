@@ -210,7 +210,9 @@ void MessageDealer::printQueryDetailed(DNS_QUERY *query) {
 }
 
 void MessageDealer::printHeaderDetailed(DNS_HEADER *header) {
-    std::cout <<"Header: "<< "id: " << header->id << " flag: " << header->flags << " question: " << header->question << " answer:"
+    std::cout <<"Header: "<< "id: " << header->id;
+    printf(" 0x%x",header->flags);
+    std::cout<< " question: " << header->question << " answer:"
               << header->answer_RR << " authority:"
               << header->authority_RR << " additional:" << header->additional_RR << std::endl;
 }
