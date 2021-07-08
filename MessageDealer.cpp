@@ -232,7 +232,7 @@ void MessageDealer::printResponsesSimple(const std::vector<DNS_RESPONSE> &respon
 
     if(responses.empty())
     {
-        std::cout<<"No Answer"<<std::endl;
+        std::cout<<"No address return"<<std::endl;
         return;
     }
     for (const auto &response : responses) {
