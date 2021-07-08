@@ -55,7 +55,7 @@ void functions::forwardQuery(char *recvBuf, sockaddr_in receive_in, sockaddr_in 
     }
 }
 
-void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive_in, SOCKET localSoc, int rec_len,std::string type,int debug_mode) {
+void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive_in, SOCKET localSoc, int rec_len,std::string type, int debug_mode) {
     //char send_buf[MAX_BUFFER_SIZE];
     char *tmp_ptr = rece_buff;
     char send_buf[MAX_BUFFER_SIZE];
@@ -124,16 +124,16 @@ void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive
     memcpy(send_buf+length, &ResourceDataLength, sizeof(unsigned short));
     length += sizeof(unsigned short);
     char *Ip = const_cast<char *>(ip.c_str());
-    auto IP = inet_addr(Ip);
+
     if (type == "IPV4") {
-        memcpy(send_buf+length, &IP, sizeof(unsigned long));
+        auto IP = inet_addr(Ip);
+        memcpy(send_buf+length, &IP, sizeof(unsigned long)); //ffff:ffff:0:10:0:7b:0:1
         length += sizeof(unsigned long);
-    } else if (type=="IPV6"){
-        memcpy(send_buf+length, &IP, sizeof(unsigned long)*4);
-        length += sizeof(unsigned long)*4;
     } else {
-        memcpy(send_buf+length, &IP, sizeof(unsigned long));
-        length += sizeof(unsigned long);
+        std::string Ip_str(Ip);
+        char* IP = MessageDealer::ipv6ToChar(Ip_str);
+        memcpy(send_buf+length, IP, sizeof(unsigned long)*4);
+        length += sizeof(unsigned long)*4;
     }
 
     int isSend;
@@ -151,7 +151,7 @@ void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive
     }
 }
 
-void functions::sendBackPTR(char *rece_buff, int rec_len,sockaddr_in receive_in, SOCKET localSoc) {
+void functions::sendBackPTR(char *rece_buff, int rec_len,sockaddr_in receive_in, SOCKET localSoc, int debug_mode) {
     char *tmp_ptr = rece_buff;
     char send_buf[MAX_BUFFER_SIZE];
     Message message=MessageDealer::messageInit(tmp_ptr,true);
@@ -190,6 +190,13 @@ void functions::sendBackPTR(char *rece_buff, int rec_len,sockaddr_in receive_in,
     if (!isSend) {
         printf("send failed");
     }
+    else{
+        Message message = MessageDealer::messageInit(send_buf,true);
+        if(debug_mode)
+            DetailedLogDealer::receiveInternal(message, tmp_ptr, rec_len);
+        else
+            SimpleLogDealer::receiveInternal(message);
+    }
 }
 
 void functions::str_split(const string &str, const string &sign, vector<std::string> &results) {
@@ -214,7 +221,7 @@ void functions::str_split(const string &str, const string &sign, vector<std::str
 }
 
 EM_IP_TYPE functions::Check_IP_V6(std::vector<std::string> vecIpSection) {
-    printf("[Check_IP_V6]size=%d.\n", vecIpSection.size());
+    //printf("[Check_IP_V6]size=%d.\n", vecIpSection.size());
     if(vecIpSection.size() != 8)
     {
         return IP_UNKNOW;

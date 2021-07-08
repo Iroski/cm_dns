@@ -36,7 +36,7 @@ void DetailedLogDealer::receiveInternal(const Message &message,char* ptr,int ptr
     std::cout << "----------INTERNAL RESPONSE---------" << std::endl;
     MessageDealer::printDetailedInfo(message);
     if (MessageDealer::isIntercept(message)) {
-        std::cout << "++++++++THIS QUERY IS BE INTERCEPTED++++++++" << std::endl;
+        std::cout << "++++++++THIS QUERY IS INTERCEPTED++++++++" << std::endl;
     }
     printBinaryInfo(ptr,ptr_len);
 }

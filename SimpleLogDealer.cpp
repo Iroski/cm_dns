@@ -13,6 +13,9 @@ void SimpleLogDealer::receiveLocal(int len, struct sockaddr_in receive_in, Messa
 void SimpleLogDealer::receiveInternal(Message message) {
     std::cout << "----------INTERNAL RESPONSE---------" << std::endl;
     MessageDealer::printResponsesSimple(message.getResponses());
+    if (MessageDealer::isIntercept(message)) {
+        std::cout << "++++++++THIS QUERY IS INTERCEPTED++++++++" << std::endl;
+    }
 }
 
 void SimpleLogDealer::receiveExternal(Message message) {

@@ -157,14 +157,14 @@ char *MessageDealer::ipv4ToChar(const std::string &str) {
     char *p=(char*)str.data();
     char buf[1024];
     inet_pton(AF_INET,p,buf);
-    return p;
+    return buf;
 }
 
 char *MessageDealer::ipv6ToChar(const std::string &str) {
     char *p=(char*)str.data();
-    char buf[1024];
+    char *buf=new char[1024];
     inet_pton(AF_INET6,p,buf);
-    return p;
+    return buf;
 }
 
 std::string MessageDealer::charToIpv6(char *str) {
