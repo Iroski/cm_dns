@@ -7,8 +7,18 @@
 
 
 #include <string>
-#include <winsock.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cstdarg>
+#include <vector>
+#include <WinSock2.h>
 #include "DetailedLogDealer.h"
+#include "SimpleLogDealer.h"
+#include "define.h"
+#include "MessageDealer.h"
+#include "DNSStore.h"
+#include "DNSStore.h"
 
 class functions {
     public:
