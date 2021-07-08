@@ -3,14 +3,14 @@
 //
 
 #include "DetailedLogDealer.h"
-#include <utility>
 
+#include <utility>
 
 void DetailedLogDealer::receiveLocal(int len, struct sockaddr_in receive_in, Message message, const std::string& server_ip,
                                      int server_port,char* ptr,int ptr_len) {
     std::cout << "\n\n-----------------------------------NEW QUERY----------------------------------------"
               << std::endl;
-    readLocalAddr(len, receive_in, std::move(server_ip), server_port);
+    readLocalAddr(len, receive_in, server_ip, server_port);
     MessageDealer::printDetailedInfo(std::move(message));
     printBinaryInfo(ptr,ptr_len);
 }

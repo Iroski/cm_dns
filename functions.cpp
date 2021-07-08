@@ -2,7 +2,7 @@
 // Created by 1 on 2021/7/6.
 //
 
-#include "define.h"
+
 #include "functions.h"
 #include "MessageDealer.h"
 #include "DNSStore.h"
@@ -11,12 +11,7 @@
 extern std::string URL;
 extern IDTransform IDTransTable[ID_AMOUNT];
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cstdarg>
-#include <vector>
-#include <string>
+
 
 using namespace std;
 
@@ -41,9 +36,9 @@ void functions::forwardQuery(char *recvBuf, sockaddr_in receive_in, sockaddr_in 
         if(debugMode){
             DetailedLogDealer::receiveExternal(message,tmp_ptr,recv_len);
         }
-       else if(debugMode == 0){
+       else {
             SimpleLogDealer::receiveExternal(message);
-       }
+        }
     }
 
     //ID转换
@@ -316,6 +311,7 @@ EM_IP_TYPE functions::Check_IP_V4(std::vector<std::string> vecIpSection) {
 
     return IP_V4;
 }
+
 
 
 

@@ -40,10 +40,7 @@ std::string MessageDealer::getHostName(char *buff, char *domain_start_ptr) {
             break;
         }
         if (domain[i] < 33)
-            if (i > 0 && i < len)
-                domain[i] = '.';
-            else
-                domain[i] = ' ';
+            domain[i] = '.';
     }
     std::string domain_str = domain;
     if(c0label!=-1){
@@ -53,8 +50,7 @@ std::string MessageDealer::getHostName(char *buff, char *domain_start_ptr) {
         domain_str.append(".");
         domain_str.append(MessageDealer::getHostName(data_start_str,domain_start_ptr));
     }
-    domain_str.erase(0, domain_str.find_first_not_of(" ")).erase(domain_str.find_last_not_of(" ") + 1)
-    .erase(0, domain_str.find_first_not_of(".")).erase(domain_str.find_last_not_of(".") + 1);
+    domain_str.erase(0, domain_str.find_first_not_of(".")).erase(domain_str.find_last_not_of(".") + 1);
     return domain_str;
 }
 
