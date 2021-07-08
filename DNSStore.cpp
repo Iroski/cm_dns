@@ -27,7 +27,7 @@ void DNSStore::initLocalTable(const std::string Path) {
     std::string Temp[TABLE_SIZE];
     std::string temp;
     if (!myfile.is_open()) {
-        printf("Open file failed");
+        printf("Open file failed, input a valid file path");
         exit(-1);
     }
     while (getline(myfile,temp)) {

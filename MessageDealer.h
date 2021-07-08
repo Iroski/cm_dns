@@ -34,6 +34,7 @@ class MessageDealer {
         static std::vector<DNS_RESPONSE> getAllResponses(char* ptr,int startPoint,int num);
         static DNS_RESPONSE getResponse(char* ptr, int* length,char * domain_start_ptr);
         static bool isIntercept(Message message);
+        static bool isIPValid(const std::string& ip);
 
 };
 
