@@ -155,7 +155,7 @@ Message MessageDealer::messageInit(char *ptr,bool isResponse) {
 
 char *MessageDealer::ipv4ToChar(const std::string &str) {
     char *p=(char*)str.data();
-    char buf[1024];
+    char *buf=new char[1024];
     inet_pton(AF_INET,p,buf);
     return buf;
 }
@@ -205,14 +205,14 @@ void MessageDealer::printResponsesDetailed(const std::vector<DNS_RESPONSE>& resp
 }
 
 void MessageDealer::printQueryDetailed(DNS_QUERY *query) {
-    std::cout <<"Query: "<<"domain name:"<< query->name << " type:" << query->type << " class:" << query->class_ << " length:"
+    std::cout <<"Query: "<<"domain name:"<< query->name << " type:" << query->type << " class:" << query->class_ << " H&Qlength:"
               << query->headerAndQueryLength << std::endl;
 }
 
 void MessageDealer::printHeaderDetailed(DNS_HEADER *header) {
-    std::cout <<"Header: "<< "id: " << header->id;
-    printf(" 0x%x",header->flags);
-    std::cout<< " question: " << header->question << " answer:"
+    std::cout <<"Header: "<< "id:" << header->id;
+    printf(" flag: 0x%x",header->flags);
+    std::cout<< " question:" << header->question << " answer:"
               << header->answer_RR << " authority:"
               << header->authority_RR << " additional:" << header->additional_RR << std::endl;
 }
@@ -247,6 +247,21 @@ bool MessageDealer::isIntercept(Message message) {
     return flag%16==3;
 }
 
+bool MessageDealer::isIPValid(const std::string& ip) {
+    std::regex V6(R"(^((([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){1,7}:)|(([0-9A-Fa-f]{1,4}:){6}:[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){5}(:[0-9A-Fa-f]{1,4}){1,2})|(([0-9A-Fa-f]{1,4}:){4}(:[0-9A-Fa-f]{1,4}){1,3})|(([0-9A-Fa-f]{1,4}:){3}(:[0-9A-Fa-f]{1,4}){1,4})|(([0-9A-Fa-f]{1,4}:){2}(:[0-9A-Fa-f]{1,4}){1,5})|([0-9A-Fa-f]{1,4}:(:[0-9A-Fa-f]{1,4}){1,6})|(:(:[0-9A-Fa-f]{1,4}){1,7})|(([0-9A-Fa-f]{1,4}:){6}(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])(\.(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])){3})|(([0-9A-Fa-f]{1,4}:){5}:(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])(\.(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])){3})|(([0-9A-Fa-f]{1,4}:){4}(:[0-9A-Fa-f]{1,4}){0,1}:(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])(\.(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])){3})|(([0-9A-Fa-f]{1,4}:){3}(:[0-9A-Fa-f]{1,4}){0,2}:(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])(\.(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])){3})|(([0-9A-Fa-f]{1,4}:){2}(:[0-9A-Fa-f]{1,4}){0,3}:(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])(\.(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])){3})|([0-9A-Fa-f]{1,4}:(:[0-9A-Fa-f]{1,4}){0,4}:(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])(\.(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])){3})|(:(:[0-9A-Fa-f]{1,4}){0,5}:(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])(\.(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])){3}))$)");
+    std::regex V4(R"(^(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])(\.(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])){3}$)");
+
+    if (std::regex_match(ip, V4))
+    {
+        return true;
+    }
+
+    else if (std::regex_match(ip, V6))
+    {
+        return true;
+    }
+    return false;
+}
 
 
 

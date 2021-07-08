@@ -1,16 +1,11 @@
-#include <bits/stdc++.h>
 #include <iostream>
 #include <WinSock2.h>
 #include <windows.h>
-#include <process.h>
 #include <cstring>
 #pragma comment(lib, "ws2_32.lib") //加载 ws2_32.dll
 #include "MessageDealer.h"
-#include "define.h"
 #include "DNSStore.h"
 #include "functions.h"
-#include "DetailedLogDealer.h"
-#include "SimpleLogDealer.h"
 
 std::string URL;  //域名
 int ID_COUNT;
@@ -28,6 +23,12 @@ int main(int argc, char **argv) {
     if (argc >= 3)
         file_path = argv[3];
     int debug_mode = getState(mode);
+    std::string ip_str(server_ip);
+    std::cout<<MessageDealer::isIPValid(ip_str)<<std::endl;
+    if(!MessageDealer::isIPValid(ip_str)){
+        std::cout<<"Invalid server ip"<<std::endl;
+        exit(-1);
+    }
     std::cout << "debug_mode:" << mode << std::endl;
     //WSA init
     WORD sockVersion = MAKEWORD(2, 2);
@@ -146,7 +147,7 @@ int getState(char *state) {
     else if (memcmp(state, "-dd", len) == 0)
         return 1;
     else {
-        std::cout << "wrong input" << std::endl;
+        std::cout << "wrong input of debug mode, please input -dd or -d" << std::endl;
         exit(-1);
     }
 }
