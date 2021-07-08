@@ -192,11 +192,6 @@ unsigned short MessageDealer::getNewID(unsigned short recv_ID, sockaddr_in recei
 
 void MessageDealer::printResponsesDetailed(const std::vector<DNS_RESPONSE>& responses) {
     int count=1;
-    if(responses.empty())
-    {
-        std::cout<<"No Answer"<<std::endl;
-        return;
-    }
     for(const auto & response : responses){
         std::cout<<"Response: "<<"count: "<<count<<" name:"<<response.name<<" type:"<<response.type
                      <<" class:"<<response.class_<<" ttl:"<<response.ttl<<" dataLength:"<<response.data_length<<" data:"<<response.data<<std::endl;
