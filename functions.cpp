@@ -24,6 +24,48 @@ void functions::forwardQuery(char *recvBuf, sockaddr_in receive_in, sockaddr_in 
     memcpy(recvBuf, &send_ID, sizeof(unsigned short));
     int send_len = sendto(externSoc, recvBuf, len, 0, (struct sockaddr *)&server_in, sizeof(server_in));
     free(recv_ID);
+
+    int recv_len = recvfrom(externSoc, recvBuf, MAX_BUFFER_SIZE, 0, nullptr, nullptr); //接受从远端发回的信息
+    if(recv_len == -1){
+        std::cout << "Receive Timeout" << std::endl;
+    }
+
+    if (recv_len != -1 && recv_len != 0) {
+        char *tmp_ptr = recvBuf;
+        Message message = MessageDealer::messageInit(tmp_ptr, true);
+
+        if(debugMode){
+            DetailedLogDealer::receiveExternal(message,tmp_ptr,recv_len);
+        }
+       else {
+            SimpleLogDealer::receiveExternal(message);
+        }
+    }
+
+    //ID转换
+    memcpy(recv_ID, recvBuf, sizeof(unsigned short)); //报文前两字节为ID
+    unsigned short oID = htons(IDTransTable[ntohs(*recv_ID)].oldID);  // 得到old id 发回给receive
+    memcpy(recvBuf, &oID, sizeof(unsigned short));
+    sockaddr_in client = IDTransTable[ntohs(*recv_ID)].client;
+    send_len = sendto(localSoc, recvBuf, recv_len, 0, (SOCKADDR*)&client, sizeof(client));
+    if(recv_len == -1){
+        std::cout << "Send Timeout" << std::endl;
+    }
+    if (send_len != -1 && send_len != 0) {
+
+    }
+}
+
+void functions::forwardSelectQuery(char *recvBuf, sockaddr_in receive_in, sockaddr_in server_in, SOCKET &externSoc, SOCKET localSoc, int len, int debugMode){
+    unsigned short* recv_ID;
+    unsigned short send_ID;
+    recv_ID = (unsigned short*)malloc(sizeof(unsigned short*));
+    memcpy(recv_ID, recvBuf, sizeof(unsigned short));    // 收到报文的ID（前2字节）
+    send_ID = htons(MessageDealer::getNewID(ntohs(*recv_ID), receive_in, FALSE));
+    memcpy(recvBuf, &send_ID, sizeof(unsigned short));
+    int send_len = sendto(externSoc, recvBuf, len, 0, (struct sockaddr *)&server_in, sizeof(server_in));
+    free(recv_ID);
+
 }
 
 void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive_in, SOCKET localSoc, int rec_len,std::string type, int debug_mode) {

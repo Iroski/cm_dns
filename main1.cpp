@@ -140,7 +140,7 @@ int main(int argc, char **argv) {
                         if (query->type == "PTR") {
                             functions::sendBackPTR(rece_buff, rec_len, receive_in, localSoc, debug_mode);
                         } else
-                            functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len, debug_mode);
+                            functions::forwardSelectQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len, debug_mode);
 
                     } else {
                         type = query->type;
@@ -157,7 +157,7 @@ int main(int argc, char **argv) {
                         functions function;
                         ipType = function.Check_IP(ip);
                         if (ip.empty()) {
-                            functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len, debug_mode);
+                            functions::forwardSelectQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len, debug_mode);
                         } else if (ip == "nigeiwoligiaogiao") {
                             break; // ********************************
                         } else {
