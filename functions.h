@@ -41,6 +41,10 @@ public:
     std::string Get_Type_Name(EM_IP_TYPE emType);
 
     EM_IP_TYPE Check_IP_V4(std::vector<std::string> vecIpSection);
+
+    static void
+    forwardSelectQuery(char *recvBuf, sockaddr_in receive_in, sockaddr_in server_in, SOCKET &externSoc, SOCKET localSoc,
+                       int len, int debugMode);
 };
 
 

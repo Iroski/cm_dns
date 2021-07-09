@@ -56,6 +56,18 @@ void functions::forwardQuery(char *recvBuf, sockaddr_in receive_in, sockaddr_in 
     }
 }
 
+void functions::forwardSelectQuery(char *recvBuf, sockaddr_in receive_in, sockaddr_in server_in, SOCKET &externSoc, SOCKET localSoc, int len, int debugMode){
+    unsigned short* recv_ID;
+    unsigned short send_ID;
+    recv_ID = (unsigned short*)malloc(sizeof(unsigned short*));
+    memcpy(recv_ID, recvBuf, sizeof(unsigned short));    // 收到报文的ID（前2字节）
+    send_ID = htons(MessageDealer::getNewID(ntohs(*recv_ID), receive_in, FALSE));
+    memcpy(recvBuf, &send_ID, sizeof(unsigned short));
+    int send_len = sendto(externSoc, recvBuf, len, 0, (struct sockaddr *)&server_in, sizeof(server_in));
+    free(recv_ID);
+
+}
+
 void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive_in, SOCKET localSoc, int rec_len,std::string type, int debug_mode) {
     //char send_buf[MAX_BUFFER_SIZE];
     char *tmp_ptr = rece_buff;
