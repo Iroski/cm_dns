@@ -102,26 +102,26 @@ int main(int argc, char **argv) {
     char rece_buff[MAX_BUFFER_SIZE];
     while (1) {
         FD_ZERO(&rfd);
-        FD_SET(localSoc,&rfd);
-        FD_SET(externSoc,&rfd);
+        FD_SET(localSoc, &rfd);
+        FD_SET(externSoc, &rfd);
 
-        selected_net= select(0,&rfd,nullptr,nullptr,&tv_out);
+        selected_net = select(0, &rfd, nullptr, nullptr, &tv_out);
         int len_rece = sizeof(receive_in);
         int rec_len;
         memset(rece_buff, 0, MAX_BUFFER_SIZE); //将接收缓存先置为全0
 
-        if(selected_net==SOCKET_ERROR){
-            std::cout<<"Internal error!";
+        if (selected_net == SOCKET_ERROR) {
+            std::cout << "Internal error!";
             closesocket(localSoc);
             closesocket(externSoc);
             return -1;
-        }else if(selected_net==0){
-            std::cout<<"Timeout!"<<std::endl;
+        } else if (selected_net == 0) {
+            std::cout << "Timeout!" << std::endl;
             closesocket(localSoc);
             closesocket(externSoc);
             break;
-        }else{
-            if(FD_ISSET(localSoc,&rfd)){
+        } else {
+            if (FD_ISSET(localSoc, &rfd)) {
                 rec_len = recvfrom(localSoc, rece_buff, sizeof(rece_buff), 0, (struct sockaddr *) &receive_in,
                                    &len_rece); //收到local
                 if (rec_len != -1 && rec_len != 0) {
@@ -130,7 +130,8 @@ int main(int argc, char **argv) {
 
                     Message local_message = MessageDealer::messageInit(tmp_ptr, false);
                     if (debug_mode)
-                        DetailedLogDealer::receiveLocal(rec_len, receive_in, local_message, server_ip, PORT, tmp_ptr, rec_len);
+                        DetailedLogDealer::receiveLocal(rec_len, receive_in, local_message, server_ip, PORT, tmp_ptr,
+                                                        rec_len);
                     else
                         SimpleLogDealer::receiveLocal(rec_len, receive_in, local_message);
 
@@ -140,7 +141,8 @@ int main(int argc, char **argv) {
                         if (query->type == "PTR") {
                             functions::sendBackPTR(rece_buff, rec_len, receive_in, localSoc, debug_mode);
                         } else
-                            functions::forwardSelectQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len, debug_mode);
+                            functions::forwardSelectQuery(rece_buff, receive_in, server_in, externSoc, localSoc,
+                                                          rec_len, debug_mode);
 
                     } else {
                         type = query->type;
@@ -157,7 +159,8 @@ int main(int argc, char **argv) {
                         functions function;
                         ipType = function.Check_IP(ip);
                         if (ip.empty()) {
-                            functions::forwardSelectQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len, debug_mode);
+                            functions::forwardSelectQuery(rece_buff, receive_in, server_in, externSoc, localSoc,
+                                                          rec_len, debug_mode);
                         } else if (ip == "nigeiwoligiaogiao") {
                             break; // ********************************
                         } else {
@@ -171,9 +174,9 @@ int main(int argc, char **argv) {
                     }
                 }
             }
-            if(FD_ISSET(externSoc,&rfd)){
+            if (FD_ISSET(externSoc, &rfd)) {
                 int recv_len = recvfrom(externSoc, rece_buff, MAX_BUFFER_SIZE, 0, nullptr, nullptr); //接受从远端发回的信息
-                if(recv_len == -1){
+                if (recv_len == -1) {
                     std::cout << "Receive Timeout" << std::endl;
                 }
 
@@ -181,21 +184,20 @@ int main(int argc, char **argv) {
                     char *tmp_ptr = rece_buff;
                     Message message = MessageDealer::messageInit(tmp_ptr, true);
 
-                    if(debug_mode){
-                        DetailedLogDealer::receiveExternal(message,tmp_ptr,recv_len);
-                    }
-                    else {
+                    if (debug_mode) {
+                        DetailedLogDealer::receiveExternal(message, tmp_ptr, recv_len);
+                    } else {
                         SimpleLogDealer::receiveExternal(message);
                     }
                 }
-                unsigned short* recv_ID=new unsigned short();
+                unsigned short *recv_ID = new unsigned short();
                 //ID转换
                 memcpy(recv_ID, rece_buff, sizeof(unsigned short)); //报文前两字节为ID
                 unsigned short oID = htons(IDTransTable[ntohs(*recv_ID)].oldID);  // 得到old id 发回给receive
                 memcpy(rece_buff, &oID, sizeof(unsigned short));
                 sockaddr_in client = IDTransTable[ntohs(*recv_ID)].client;
-                int send_len = sendto(localSoc, rece_buff, recv_len, 0, (SOCKADDR*)&client, sizeof(client));
-                if(recv_len == -1){
+                int send_len = sendto(localSoc, rece_buff, recv_len, 0, (SOCKADDR *) &client, sizeof(client));
+                if (recv_len == -1) {
                     std::cout << "Send Timeout" << std::endl;
                 }
                 if (send_len != -1 && send_len != 0) {
@@ -203,8 +205,6 @@ int main(int argc, char **argv) {
                 }
             }
         }
-
-
 
 
     }
