@@ -86,26 +86,26 @@ int main(int argc, char **argv) {
             std::cout << "bind local socket to server, port:" << EXTERN_PORT << std::endl;
     }
 
-    fd_set rfd;
+    fd_set fdSet;
 
-    struct timeval tv_out; // 设置超时
-    tv_out.tv_sec = 60;
-    tv_out.tv_usec = 0;
-    if (setsockopt(externSoc, SOL_SOCKET, SO_RCVTIMEO, (char *) &tv_out, sizeof(tv_out)) == -1) {
-        std::cout << "External Socket setsockopt failed:" << std::endl;
+    struct timeval time_out; // 设置超时
+    time_out.tv_sec = 60;
+    time_out.tv_usec = 0;
+    if (setsockopt(externSoc, SOL_SOCKET, SO_RCVTIMEO, (char *) &time_out, sizeof(time_out)) == -1) {
+        std::cout << "External Socket set time out failed" << std::endl;
     }
-    if (setsockopt(localSoc, SOL_SOCKET, SO_RCVTIMEO, (char *) &tv_out, sizeof(tv_out)) == -1) {
-        std::cout << "Local Socket setsockopt failed:" << std::endl;
+    if (setsockopt(localSoc, SOL_SOCKET, SO_RCVTIMEO, (char *) &time_out, sizeof(time_out)) == -1) {
+        std::cout << "Inernal Socket set time out failed" << std::endl;
     }
 
     int selected_net;
     char rece_buff[MAX_BUFFER_SIZE];
     while (1) {
-        FD_ZERO(&rfd);
-        FD_SET(localSoc, &rfd);
-        FD_SET(externSoc, &rfd);
+        FD_ZERO(&fdSet);
+        FD_SET(localSoc, &fdSet);
+        FD_SET(externSoc, &fdSet);
 
-        selected_net = select(0, &rfd, nullptr, nullptr, &tv_out);
+        selected_net = select(0, &fdSet, nullptr, nullptr, &time_out);
         int len_rece = sizeof(receive_in);
         int rec_len;
         memset(rece_buff, 0, MAX_BUFFER_SIZE); //将接收缓存先置为全0
@@ -116,12 +116,12 @@ int main(int argc, char **argv) {
             closesocket(externSoc);
             return -1;
         } else if (selected_net == 0) {
-            std::cout << "Timeout!" << std::endl;
+            std::cout << "Time out, error may happen!" << std::endl;
             closesocket(localSoc);
             closesocket(externSoc);
             break;
         } else {
-            if (FD_ISSET(localSoc, &rfd)) {
+            if (FD_ISSET(localSoc, &fdSet)) {
                 rec_len = recvfrom(localSoc, rece_buff, sizeof(rece_buff), 0, (struct sockaddr *) &receive_in,
                                    &len_rece); //收到local
                 if (rec_len != -1 && rec_len != 0) {
@@ -174,7 +174,7 @@ int main(int argc, char **argv) {
                     }
                 }
             }
-            if (FD_ISSET(externSoc, &rfd)) {
+            if (FD_ISSET(externSoc, &fdSet)) {
                 int recv_len = recvfrom(externSoc, rece_buff, MAX_BUFFER_SIZE, 0, nullptr, nullptr); //接受从远端发回的信息
                 if (recv_len == -1) {
                     std::cout << "Receive Timeout" << std::endl;
