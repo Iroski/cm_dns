@@ -115,12 +115,7 @@ int main(int argc, char **argv) {
             closesocket(localSoc);
             closesocket(externSoc);
             return -1;
-        } else if (selected_net == 0) {
-            std::cout << "Time out, error may happen!" << std::endl;
-            closesocket(localSoc);
-            closesocket(externSoc);
-            break;
-        } else {
+        }  else {
             if (FD_ISSET(localSoc, &fdSet)) {
                 rec_len = recvfrom(localSoc, rece_buff, sizeof(rece_buff), 0, (struct sockaddr *) &receive_in,
                                    &len_rece); //收到local
