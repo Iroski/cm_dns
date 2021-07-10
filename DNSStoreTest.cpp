@@ -16,5 +16,11 @@ int main() {
               << store.getStoredIpByDomain("www.bupt.com.cn") << " "
               << store.getStoredIpByDomain("www.baidu.com") << std::endl;
     //std::cout<<DNSTable<<std::endl;
+    for (auto &iter : store_map) {
+        std::cout << iter.first << " " << iter.second << std::endl;
+    }
+    for (auto &iter : store_map6) {
+        std::cout << iter.first << " " << iter.second << std::endl;
+    }
     return 0;
 }
