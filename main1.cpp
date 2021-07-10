@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
 
     char *mode = "-dd";
     char *server_ip = "8.8.8.8";
-    char *file_path = "dnsdelay.txt";
+    char *file_path = "dnsrelay.txt";
 
     if (argc >= 1)
         mode = argv[1]; //0:-d  1:-dd
