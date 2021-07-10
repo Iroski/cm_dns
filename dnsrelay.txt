@@ -1,8 +1,8 @@
-114.255.40.66 www.bupt.com.cn
+0.0.0.0 www.bupt.edu.cn
 0:0:0:0:0:0:0:0 www.iroski.top
 0:0:0:0:0:0:0:0 www.google.com
-0.0.0.0 www.google.com
 0.0.0.0 www.666.com
 1:1:1:1:1:1:1:1 www.yongganb418.com
-0.0.0.0 www.youtube.com
+10.10.10.10 www.yongganb418.com
+31.13.71.23 www.youtube.com
 0:0:0:0:0:0:0:0 www.twitter.com

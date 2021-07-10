@@ -31,6 +31,7 @@ void DNSStore::initLocalTable(const std::string Path) {
         printf("Open file failed, input a valid file path");
         exit(-1);
     }
+
     while (getline(myfile,temp)) {
         if (temp=="") {
             break;
@@ -44,6 +45,7 @@ void DNSStore::initLocalTable(const std::string Path) {
             break;
         }
     }
+
     for (int j=0;j<(DNSStoreNum+DNSStoreNum6);j++) {
         std::vector<std::string> res;
         std::string result;
@@ -59,6 +61,7 @@ void DNSStore::initLocalTable(const std::string Path) {
             ++DNSStoreNum6;
         }
     }
+
 //    for (auto &iter : store_map) {
 //        std::cout << iter.first << " " << iter.second << std::endl;
 //    }

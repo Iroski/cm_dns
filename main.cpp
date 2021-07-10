@@ -128,27 +128,45 @@ int main(int argc, char **argv) {
                 type = query->type;
                 URL = MessageDealer::getHostName(tmp_ptr + 12, tmp_ptr); // 读取域名
 
-                std::string ip;
-                // if (type=="IPV4")
-                ip = store.getStoredIpByDomain(URL);   //查看是否在本地表中
-//                } //else {
-                //ip = store.getStoredIp6ByDomain(URL);   //查看是否在本地表中
-                //}
-
+                std::string ip4;
+                std::string ip6;
+                ip4 = store.getStoredIpByDomain(URL);   //查看是否在本地表中
+                ip6 = store.getStoredIp6ByDomain(URL);   //查看是否在本地表中
                 EM_IP_TYPE ipType = IP_UNKNOW;
                 functions function;
-                ipType = function.Check_IP(ip);
-                if (ip.empty()) {
-                    functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len, debug_mode);
-                } else if (ip == "nigeiwoligiaogiao") {
-                    break; // ********************************
-                } else {
-//                    if ((function.Get_Type_Name(ipType)!=type)) {
-//                        functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len, debug_mode);
-//                    }
-//                    else {
-                    functions::sendingBack(rece_buff, ip, receive_in, localSoc, rec_len, type, debug_mode);
-//                    }
+                ipType = function.Check_IP(ip4);
+                if (type=="IPV4") {
+                    if ((ip4.empty()&&!ip6.empty()&&ip6!="0:0:0:0:0:0:0:0")||(ip4.empty()&&ip6.empty())) {
+                        functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len, debug_mode);
+                    }
+                    else if (ip4 == "111111111111111111") {
+                        break; // ********************************
+                    }
+                    else {
+                        if (ip4 == "0.0.0.0"||ip6=="0:0:0:0:0:0:0:0") {
+                            functions::sendingBack(rece_buff, "0.0.0.0", receive_in, localSoc, rec_len, type, debug_mode);
+                        }
+                        else {
+                            functions::sendingBack(rece_buff, ip4, receive_in, localSoc, rec_len, type, debug_mode);
+                        }
+                    }
+                }
+                else {
+                    if ((ip6.empty()&&!ip4.empty()&&ip4!="0.0.0.0")||(ip4.empty()&&ip6.empty())) {
+                        functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len, debug_mode);
+                    }
+                    else if (ip4 == "111111111111111111") {
+                        break; // ********************************
+                    }
+                    else {
+                        if (ip4 == "0.0.0.0"||ip6=="0:0:0:0:0:0:0:0") {
+                            functions::sendingBack(rece_buff, "0:0:0:0:0:0:0:0", receive_in, localSoc, rec_len, type, debug_mode);
+                        }
+                        else {
+                            std::cout<<ip6<<std::endl;
+                            functions::sendingBack(rece_buff, ip6, receive_in, localSoc, rec_len, type, debug_mode);
+                        }
+                    }
                 }
             }
         }

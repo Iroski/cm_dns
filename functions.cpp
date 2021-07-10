@@ -82,9 +82,10 @@ void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive
     unsigned short *pID = (unsigned short *) malloc(sizeof(unsigned short *));
     memcpy(pID, rece_buff, sizeof(unsigned short));
     memcpy(send_buf, rece_buff, rec_len);
-    unsigned short nID = htons(MessageDealer::getNewID(ntohs(*pID), receive_in, FALSE));;//***********************
+    unsigned short nID = htons(MessageDealer::getNewID(ntohs(*pID), receive_in, FALSE));
     //functions::printDNSInformation(nID, 1, ip);
     unsigned short AFlag;
+
     if (ip == "0.0.0.0"||ip == "0:0:0:0:0:0:0:0") {
         unsigned short AFlag = htons(0x8183); //1000 0001 1000 0011
         memcpy(&send_buf[2], &AFlag, sizeof(unsigned short));
@@ -97,7 +98,8 @@ void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive
     if (ip == "0.0.0.0"||ip == "0:0:0:0:0:0:0:0") {
         ansCount = htons(0x0000);
         //printf("**********  No such name!  **********\n");
-    } else {
+    }
+    else {
         //printf("**************  Have this name!  ****************\n");
         ansCount = htons(0x0001);
     }
@@ -110,7 +112,9 @@ void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive
     if (type == "IPV4") {
         unsigned short TypeA = htons(0x0001);
         memcpy(send_buf+length, &TypeA, sizeof(unsigned short));
-    } else if (type=="IPV6"){
+    }
+
+    else if (type=="IPV6"){
         unsigned short TypeAAAA = htons(0x001C);
         memcpy(send_buf+length, &TypeAAAA, sizeof(unsigned short));
     }
@@ -131,9 +135,11 @@ void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive
     unsigned short ResourceDataLength;
     if (type == "IPV4") {
         ResourceDataLength = htons(0x0004);
-    } else if (type=="IPV6"){
+    }
+    else if (type=="IPV6"){
         ResourceDataLength = htons(0x0010);
-    } else {
+    }
+    else {
         ResourceDataLength = htons(0x0004);
     }
     memcpy(send_buf+length, &ResourceDataLength, sizeof(unsigned short));
@@ -144,7 +150,8 @@ void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive
         auto IP = inet_addr(Ip);
         memcpy(send_buf+length, &IP, sizeof(unsigned long)); //ffff:ffff:0:10:0:7b:0:1
         length += sizeof(unsigned long);
-    } else {
+    }
+    else {
         std::string Ip_str(Ip);
         char* IP = MessageDealer::ipv6ToChar(Ip_str);
         memcpy(send_buf+length, IP, sizeof(unsigned long)*4);
@@ -155,7 +162,8 @@ void functions::sendingBack(char *rece_buff, std::string ip, sockaddr_in receive
     isSend = sendto(localSoc, send_buf, length, 0, (SOCKADDR*)&receive_in, sizeof(receive_in));
     if (!isSend) {
         printf("send failed");
-    }else{
+    }
+    else{
         Message message = MessageDealer::messageInit(send_buf,true);
         if(debug_mode){
             DetailedLogDealer::receiveInternal(message,send_buf,isSend);
@@ -211,10 +219,12 @@ void functions::sendBackPTR(char *rece_buff, int rec_len,sockaddr_in receive_in,
     }
     else{
         Message message = MessageDealer::messageInit(send_buf,true);
-        if(debug_mode)
+        if(debug_mode) {
             DetailedLogDealer::receiveInternal(message, tmp_ptr, rec_len);
-        else
+        }
+        else {
             SimpleLogDealer::receiveInternal(message);
+        }
     }
 }
 
