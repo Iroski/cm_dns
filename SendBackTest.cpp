@@ -135,11 +135,10 @@ int main(int argc, char **argv) {
                 EM_IP_TYPE ipType = IP_UNKNOW;
                 functions function;
                 ipType = function.Check_IP(ip4);
+                std::cout<<"ip4:"<<ip4<<std::endl;
+                std::cout<<"ip6:"<<ip6<<std::endl;
                 if (type=="IPV4") {
-                    if ((ip4.empty()&&!ip6.empty()&&ip6!="0:0:0:0:0:0:0:0")||(ip4.empty()&&ip6.empty())) {
-                        functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len, debug_mode);
-                    }
-                    else if (ip4 == "111111111111111111") {
+                   if (ip4 == "111111111111111111") {
                         break; // ********************************
                     }
                     else {
@@ -152,10 +151,7 @@ int main(int argc, char **argv) {
                     }
                 }
                 else {
-                    if ((ip6.empty()&&!ip4.empty()&&ip4!="0.0.0.0")||(ip4.empty()&&ip6.empty())) {
-                        functions::forwardQuery(rece_buff, receive_in, server_in, externSoc, localSoc, rec_len, debug_mode);
-                    }
-                    else if (ip4 == "111111111111111111") {
+                   if (ip4 == "111111111111111111") {
                         break; // ********************************
                     }
                     else {
@@ -163,6 +159,7 @@ int main(int argc, char **argv) {
                             functions::sendingBack(rece_buff, "0:0:0:0:0:0:0:0", receive_in, localSoc, rec_len, type, debug_mode);
                         }
                         else {
+                            std::cout<<ip6<<std::endl;
                             functions::sendingBack(rece_buff, ip6, receive_in, localSoc, rec_len, type, debug_mode);
                         }
                     }
